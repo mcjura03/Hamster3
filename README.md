@@ -1,4 +1,4 @@
-Hamster-Simulator Java 25
+# Hamster-Simulator Java 25
 ---------------------------------
 
 (1)
@@ -9,5 +9,5 @@ https://www.java-hamster-modell.de/index.html
 (2)
 Änderungen zum Original bestehen in:
 
-# Entfernen von veralteten Datentypen (Observable, )
-# Update der verwendeten Grafiken
+- Entfernen von veralteten Datentypen (Observable, )
+- Update der verwendeten Grafiken
