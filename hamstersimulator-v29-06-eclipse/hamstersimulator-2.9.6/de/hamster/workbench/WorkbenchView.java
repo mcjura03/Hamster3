@@ -13,8 +13,10 @@ import java.awt.event.WindowFocusListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -31,7 +33,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 
 import de.hamster.compiler.model.CompilerModel;
 import de.hamster.console.Console;
@@ -42,232 +43,47 @@ import de.hamster.simulation.view.multimedia.opengl.J3DFrame;
 import de.hamster.simulation.view.multimedia.opengl.OpenGLController;
 
 /**
- * Diese Klasse implementiert den View-Teil der Werkbank. Instanzen erzeugen
- * zwei Fenster und fuegen die einzelnen Komponenten des Hamster-Simulators ein.
+ * View-Teil der Werkbank.
  *
- * Die Klasse verwaltet ausserdem die Toolbars und Menuezeilen, in die die
- * einzelnen Komponenten ihre Eintraege einfuegen koennen.
- *
- * @author Daniel Jasper
+ * Best Practices:
+ * - PropertyChangeListener statt Observable/Observer
+ * - Keine Listener-Registrierung im Konstruktor (vermeidet "leaking this")
+ * - Actions als static Klassen ohne implizite Outer-Referenz
+ * - WebBrowser.open(...) statt "new instance ignored"
  */
 public class WorkbenchView implements PropertyChangeListener, WindowFocusListener {
 
 	private static final Logger LOGGER = Logger.getLogger(WorkbenchView.class.getName());
 
-	/**
-	 * Dies ist eine Verknuepfung zum Controller der Werkbank.
-	 */
 	private final Workbench workbench;
+	private final WorkbenchModel model;
 
-	/**
-	 * Dies ist eine Verknuepfung zur View der Werkbank.
-	 */
-	private WorkbenchModel model;
-
-	/**
-	 * In dieser Map werden die einzelnen Menuebars ueber einen Schluessel gespeichert.
-	 */
 	private final Map<String, JMenuBar> menuBars;
-
-	/**
-	 * In dieser Map werden die einzelnen Menues ueber einen Schluessel gespeichert.
-	 */
 	private final Map<String, JMenu> menus;
-
-	/**
-	 * In dieser Map werden die einzelnen Toolbars ueber einen Schluessel gespeichert.
-	 */
 	private final Map<String, JToolBar> toolBars;
 
-	/**
-	 * Dies ist das Fenster des Editors.
-	 */
 	private JFrame editor;
-
-	/**
-	 * Dies ist das Fenster der Simulation.
-	 */
 	private JFrame simulation;
-
-	/*
-	 * Console für Standard-Out, -Err und -In
-	 */
 	private Console console;
-
-	/**
-	 * Dies ist das Fenster der Simulation. // chris
-	 */
 	private J3DFrame opengl;
 
-	/**
-	 * In diesem Panel werden die beiden Komponenten des Debuggers
-	 * (StackframeViewer und VariableViewer) angeordnet.
-	 */
 	private JPanel debugPanel;
-
-	/**
-	 * Diese Panel enthaelt die Debugger-Komponenten, die Textflaechen und die
-	 * Compiler-Fehler-Anzeige.
-	 */
 	private JPanel mainPanel;
 
-	/**
-	 * ResourceBundle für Lokalisierung.
-	 */
 	private final ResourceBundle resources;
 
-	public class ShowInfoAction extends AbstractAction {
-		public ShowInfoAction() {
-			Utils.setData(this, "workbench.info");
-		}
+	// Actions (werden erst in initializeUiActions() erzeugt)
+	public AbstractAction showInfoAction;
+	public AbstractAction showManualAction;
+	public AbstractAction showAPIAction;
+	public AbstractAction showImpAction;
+	public AbstractAction showOOAction;
+	public AbstractAction showParAction;
+	public AbstractAction showHWWWAction;
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			InfoFrame.getInstance().setVisible(true);
-		}
-	}
-
-	public ShowInfoAction showInfoAction = new ShowInfoAction();
-
-	public class ShowManualAction extends AbstractAction {
-		public ShowManualAction() {
-			Utils.setData(this, "workbench.manual");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			try {
-				Desktop desktop = Desktop.getDesktop();
-				desktop.browse(new File("handbuch/handbuch.pdf").toURI());
-			} catch (Exception exc) {
-				LOGGER.log(Level.WARNING, "Konnte Handbuch lokal nicht öffnen, falle auf WebBrowser zurück.", exc);
-				new WebBrowser(
-						Utils.getResources().getString("workbench.manual.text"),
-						"http://www.java-hamster-modell.de/download/v29/handbuch.pdf");
-			}
-		}
-	}
-
-	public ShowManualAction showManualAction = new ShowManualAction();
-
-	public class ShowAPIAction extends AbstractAction {
-		public ShowAPIAction() {
-			Utils.setData(this, "workbench.api");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			try {
-				Desktop desktop = Desktop.getDesktop();
-				desktop.browse(new File("API/index.html").toURI());
-			} catch (Exception exc) {
-				LOGGER.log(Level.WARNING, "Konnte API lokal nicht öffnen, falle auf WebBrowser zurück.", exc);
-				new WebBrowser(Utils.getResources().getString("workbench.api.text"),
-						"http://www.java-hamster-modell.de/band2/API/index.html");
-			}
-		}
-	}
-
-	public ShowAPIAction showAPIAction = new ShowAPIAction();
-
-	public class ShowImpAction extends AbstractAction {
-		public ShowImpAction() {
-			Utils.setData(this, "workbench.imp");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			try {
-				Desktop desktop = Desktop.getDesktop();
-				desktop.browse(new URI("http://www.java-hamster-modell.de/eBooks/hamster1.pdf"));
-			} catch (Exception exc) {
-				LOGGER.log(Level.WARNING, "Konnte Link nicht öffnen, falle auf WebBrowser zurück.", exc);
-				new WebBrowser(Utils.getResources().getString("workbench.imp.text"),
-						"http://books.google.com/books?id=_pQ-9QTpcZMC&hl=de");
-			}
-		}
-	}
-
-	public ShowImpAction showImpAction = new ShowImpAction();
-
-	public class ShowOOAction extends AbstractAction {
-		public ShowOOAction() {
-			Utils.setData(this, "workbench.oo");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			try {
-				Desktop desktop = Desktop.getDesktop();
-				desktop.browse(new URI("http://www.java-hamster-modell.de/eBooks/hamster2.pdf"));
-			} catch (Exception exc) {
-				LOGGER.log(Level.WARNING, "Konnte Link nicht öffnen, falle auf WebBrowser zurück.", exc);
-				new WebBrowser(Utils.getResources().getString("workbench.oo.text"),
-						"http://books.google.de/books?id=CnPbZO98SjAC");
-			}
-		}
-	}
-
-	public ShowOOAction showOOAction = new ShowOOAction();
-
-	public class ShowParAction extends AbstractAction {
-		public ShowParAction() {
-			Utils.setData(this, "workbench.par");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			try {
-				Desktop desktop = Desktop.getDesktop();
-				desktop.browse(new URI("http://www.java-hamster-modell.de/eBooks/hamster3.pdf"));
-			} catch (Exception exc) {
-				LOGGER.log(Level.WARNING, "Konnte Link nicht öffnen, falle auf WebBrowser zurück.", exc);
-				new WebBrowser(Utils.getResources().getString("workbench.par.text"),
-						"http://books.google.de/books?id=AZlQeTp1ORkC");
-			}
-		}
-	}
-
-	public ShowParAction showParAction = new ShowParAction();
-
-	public class ShowHWWWAction extends AbstractAction {
-		public ShowHWWWAction() {
-			Utils.setData(this, "workbench.hwww");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			try {
-				Desktop desktop = Desktop.getDesktop();
-				desktop.browse(new URI("http://www.java-hamster-modell.de"));
-			} catch (Exception exc) {
-				LOGGER.log(Level.WARNING, "Konnte Link nicht öffnen, falle auf WebBrowser zurück.", exc);
-				new WebBrowser(Utils.getResources().getString("workbench.hwww.text"),
-						"http://www.java-hamster-modell.de");
-			}
-		}
-	}
-
-	public ShowHWWWAction showHWWWAction = new ShowHWWWAction();
-
-	/**
-	 * Diese Methode erzeugt die WorkbenchView. Sie fügt sich selbst als Listener
-	 * zum Debugger und Compiler hinzu, damit UI-Komponenten ein-/ausgeblendet werden können.
-	 */
 	public WorkbenchView(Workbench workbench) {
 		this.workbench = workbench;
 		this.model = workbench.getModel();
-
-		// Alt: addObserver(this)
-		// Neu: PropertyChangeListener (nach Konstruktor-Ende registrieren, um "leaking this" zu vermeiden)
-		SwingUtilities.invokeLater(() -> {
-			this.model.getDebuggerModel().addPropertyChangeListener(WorkbenchView.this);
-			this.model.getCompilerModel().addPropertyChangeListener(WorkbenchView.this);
-
-			if (Utils.LEGO) {
-				this.model.getLegoModel().addPropertyChangeListener(WorkbenchView.this);
-			}
-		});
 
 		this.toolBars = new HashMap<>();
 		this.menuBars = new HashMap<>();
@@ -277,49 +93,141 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 	}
 
 	/**
-	 * @author chris
-	 * Diese Methode macht das 3D-Fenster sichtbar oder versteckt es.
+	 * Muss NACH dem Konstruktor aufgerufen werden (Best Practice).
+	 * Erst hier werden Actions erstellt → verhindert "leaking this" in Feldinitialisierungen.
 	 */
-	public void set3DVisible(boolean value) {
-		if (!Utils.DREI_D)
-			return;
+	public void initializeUiActions() {
+		this.showInfoAction = new SimpleAction("workbench.info", () -> InfoFrame.getInstance().setVisible(true));
 
-		opengl.setVisible(value); // chris
-		OpenGLController.getInstance().setRunning(value); // chris
+		this.showManualAction = new SimpleAction("workbench.manual", () -> openLocalFileOrWeb(
+				new File("handbuch/handbuch.pdf"),
+				"workbench.manual.text",
+				"http://www.java-hamster-modell.de/download/v29/handbuch.pdf",
+				"Konnte Handbuch lokal nicht öffnen, falle auf WebBrowser zurück."));
+
+		this.showAPIAction = new SimpleAction("workbench.api", () -> openLocalFileOrWeb(
+				new File("API/index.html"),
+				"workbench.api.text",
+				"http://www.java-hamster-modell.de/band2/API/index.html",
+				"Konnte API lokal nicht öffnen, falle auf WebBrowser zurück."));
+
+		this.showImpAction = new SimpleAction("workbench.imp", () -> openUriOrWeb(
+				"http://www.java-hamster-modell.de/eBooks/hamster1.pdf",
+				"workbench.imp.text",
+				"http://books.google.com/books?id=_pQ-9QTpcZMC&hl=de",
+				"Konnte Link nicht öffnen, falle auf WebBrowser zurück."));
+
+		this.showOOAction = new SimpleAction("workbench.oo", () -> openUriOrWeb(
+				"http://www.java-hamster-modell.de/eBooks/hamster2.pdf",
+				"workbench.oo.text",
+				"http://books.google.de/books?id=CnPbZO98SjAC",
+				"Konnte Link nicht öffnen, falle auf WebBrowser zurück."));
+
+		this.showParAction = new SimpleAction("workbench.par", () -> openUriOrWeb(
+				"http://www.java-hamster-modell.de/eBooks/hamster3.pdf",
+				"workbench.par.text",
+				"http://books.google.de/books?id=AZlQeTp1ORkC",
+				"Konnte Link nicht öffnen, falle auf WebBrowser zurück."));
+
+		this.showHWWWAction = new SimpleAction("workbench.hwww", () -> openUriOrWeb(
+				"http://www.java-hamster-modell.de",
+				"workbench.hwww.text",
+				"http://www.java-hamster-modell.de",
+				"Konnte Link nicht öffnen, falle auf WebBrowser zurück."));
 	}
 
 	/**
-	 * Diese Methode macht die beiden Fenster sichtbar oder versteckt sie.
+	 * Muss NACH dem Konstruktor aufgerufen werden (Best Practice).
+	 * Erst hier Listener registrieren → verhindert "leaking this in constructor".
 	 */
+	public void startListening() {
+		model.getDebuggerModel().addPropertyChangeListener(this);
+		model.getCompilerModel().addPropertyChangeListener(this);
+
+		if (Utils.LEGO) {
+			model.getLegoModel().addPropertyChangeListener(this);
+		}
+	}
+
+	// ---------------- Actions (static, keine implizite Outer-Referenz) ----------------
+
+	private static final class SimpleAction extends AbstractAction {
+		private final Runnable onAction;
+
+		private SimpleAction(String resourceKey, Runnable onAction) {
+			this.onAction = onAction;
+			Utils.setData(this, resourceKey);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			onAction.run();
+		}
+	}
+
+	// ---------------- Robust "open" helpers ----------------
+
+	private void openLocalFileOrWeb(File localFile, String fallbackTextKey, String fallbackUrl, String logMsg) {
+		try {
+			Desktop.getDesktop().browse(localFile.toURI());
+		} catch (IOException | SecurityException | UnsupportedOperationException ex) {
+			LOGGER.log(Level.WARNING, logMsg, ex);
+			new WebBrowser(resources.getString(fallbackTextKey), fallbackUrl);
+		}
+	}
+
+	private void openUriOrWeb(String uriString, String fallbackTextKey, String fallbackUrl, String logMsg) {
+		try {
+			Desktop.getDesktop().browse(new URI(uriString));
+		} catch (IOException | URISyntaxException | SecurityException | UnsupportedOperationException ex) {
+			LOGGER.log(Level.WARNING, logMsg, ex);
+			new WebBrowser(resources.getString(fallbackTextKey), fallbackUrl);
+		}
+	}
+
+	// ---------------- Visibility ----------------
+
+	public void set3DVisible(boolean value) {
+		if (!Utils.DREI_D) {
+			return;
+		}
+		opengl.setVisible(value);
+		OpenGLController.getInstance().setRunning(value);
+	}
+
 	public void setVisible(boolean value) {
-		editor.setLocation(50, 50); // dibo
+		editor.setLocation(50, 50);
 		editor.setVisible(value);
-		simulation.setLocation(200, 200); // dibo
+		simulation.setLocation(200, 200);
 		simulation.setVisible(value);
 	}
 
 	public void setOnlySimVisible(boolean value) {
-		editor.setLocation(50, 50); // dibo
+		editor.setLocation(50, 50);
 		editor.setVisible(false);
-		simulation.setLocation(200, 200); // dibo
+
+		simulation.setLocation(200, 200);
 		simulation.setVisible(value);
-		if (!Utils.DREI_D)
+
+		if (!Utils.DREI_D) {
 			return;
-		opengl.setVisible(value); // chris
-		OpenGLController.getInstance().setRunning(value); // chris
+		}
+		opengl.setVisible(value);
+		OpenGLController.getInstance().setRunning(value);
 	}
 
-	/*
-	 * Erzeugt die Console dibo 070708
-	 */
+	// ---------------- Console ----------------
+
 	public void createConsole() {
 		console = new Console();
 		console.setDefaultCloseOperation(0);
+
 		if (Utils.runlocally) {
 			System.setOut(new PrintStream(console.getOut()));
 			System.setErr(new PrintStream(console.getErr()));
 			System.setIn(console.getIn());
 		}
+
 		console.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -337,12 +245,11 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 		}
 	}
 
-	/**
-	 * Diese Methode erzeugt das Simulationsfenster.
-	 */
+	// ---------------- Frames ----------------
+
 	public void createSimulationFrame() {
 		simulation = new JFrame("Simulation");
-		simulation.setSize(700, 500); // dibo
+		simulation.setSize(700, 500);
 		simulation.setDefaultCloseOperation(0);
 		simulation.addWindowListener(new WindowAdapter() {
 			@Override
@@ -364,16 +271,18 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 		JPanel log = workbench.getSimulation().getLogPanel();
 		log.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 		log.setPreferredSize(new Dimension(200, 200));
+
 		JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, log);
 		sp.setResizeWeight(1);
 		sp.setOneTouchExpandable(true);
 		sp.setDividerLocation(500);
+
 		main.add(BorderLayout.CENTER, sp);
 
-		if (!Utils.DREI_D)
+		if (!Utils.DREI_D) {
 			return;
+		}
 
-		// chris: 3D-Ansichtshauptfenster
 		try {
 			opengl = new J3DFrame();
 			opengl.setSize(640, 480);
@@ -382,8 +291,11 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 			JToolBar simulationBar3D = findToolBar("3dsimulation");
 			opengl.getContentPane().add(BorderLayout.NORTH, simulationBar3D);
 
-			OpenGLController.getInstance().create3DView(opengl, workbench,
-					workbench.getSimulation().getSimulationModel(), workbench.getDebugger().getDebuggerModel());
+			OpenGLController.getInstance().create3DView(
+					opengl,
+					workbench,
+					workbench.getSimulation().getSimulationModel(),
+					workbench.getDebugger().getDebuggerModel());
 
 			opengl.addWindowListener(new WindowAdapter() {
 				@Override
@@ -397,21 +309,16 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 		}
 	}
 
-	/**
-	 * Diese Methode erzeugt das Editorfenster.
-	 */
 	public void createEditorFrame() {
 		editor = new JFrame("Editor");
-		editor.setSize(800, 600); // dibo
+		editor.setSize(800, 600);
 		editor.setDefaultCloseOperation(0);
 		editor.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-
 				if (Utils.DREI_D) {
-					OpenGLController.getInstance().setRunning(false); // chris
+					OpenGLController.getInstance().setRunning(false);
 				}
-
 				workbench.close(editor);
 			}
 		});
@@ -447,24 +354,20 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 		editor.getContentPane().add(BorderLayout.CENTER, sp);
 	}
 
-	/**
-	 * Toolbar finden/erzeugen.
-	 */
+	// ---------------- Menus/Toolbars ----------------
+
 	public JToolBar findToolBar(String id) {
 		JToolBar toolBar = toolBars.get(id);
 		if (toolBar == null) {
 			toolBar = new JToolBar(resources.getString("toolbar." + id + ".text"));
 			toolBar.setMargin(new Insets(1, 1, 0, 0));
 			toolBar.setFloatable(false);
-			toolBar.setBackground(new Color(255, 215, 180)); // dibo 230309
+			toolBar.setBackground(new Color(255, 215, 180));
 			toolBars.put(id, toolBar);
 		}
 		return toolBar;
 	}
 
-	/**
-	 * Menuebar finden/erzeugen.
-	 */
 	public JMenuBar findMenuBar(String id) {
 		JMenuBar menuBar = menuBars.get(id);
 		if (menuBar == null) {
@@ -474,59 +377,40 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 		return menuBar;
 	}
 
-	/**
-	 * Menue finden/erzeugen.
-	 */
 	public JMenu findMenu(String bar, String key) {
-		JMenu menu = menus.get(bar + "." + key);
+		String mapKey = bar + "." + key;
+		JMenu menu = menus.get(mapKey);
 		if (menu == null) {
 			menu = new JMenu(resources.getString("menu." + bar + "." + key + ".text"));
 			findMenuBar(bar).add(menu);
-			menus.put(bar + "." + key, menu);
+			menus.put(mapKey, menu);
 		}
 		return menu;
 	}
 
-	/**
-	 * Neu: reagiert auf PropertyChange-Events statt Observable.
-	 */
+	// ---------------- PropertyChangeListener ----------------
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		// UI-Änderungen immer auf dem EDT
-		if (SwingUtilities.isEventDispatchThread()) {
-			handleModelEvent(evt);
-		} else {
-			SwingUtilities.invokeLater(() -> handleModelEvent(evt));
-		}
+		handleModelEvent(evt);
 	}
 
 	private void handleModelEvent(PropertyChangeEvent evt) {
 		String prop = evt.getPropertyName();
 
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			// UI immer auf dem EDT
-			if (SwingUtilities.isEventDispatchThread()) {
-				handleModelEvent(evt);
-			} else {
-				SwingUtilities.invokeLater(() -> handleModelEvent(evt));
-			}
-		}
-		
-		private void handleModelEvent(PropertyChangeEvent evt) {
-			String prop = evt.getPropertyName();
-		
-			// Compiler
-			if (CompilerModel.COMPILER_ERRORS.equals(prop)) {
-				if (model.getCompilerModel().getCompilerErrors().isEmpty()) {   // <- isEmpty statt size()==0
-					JOptionPane.showMessageDialog(editor, Utils.getResource("workbench.kompilierung"));
+		if (CompilerModel.COMPILER_ERRORS.equals(prop)) {
+			if (model.getCompilerModel().getCompilerErrors().isEmpty()) {
+				JOptionPane.showMessageDialog(editor, Utils.getResource("workbench.kompilierung"));
+				if (mainPanel != null) {
 					mainPanel.remove(workbench.getComiler().getErrorPanel());
-				} else {
+				}
+			} else {
+				if (mainPanel != null) {
 					mainPanel.add(BorderLayout.SOUTH, workbench.getComiler().getErrorPanel());
 				}
 			}
-			// Debugger
-			else if (DebuggerModel.ARG_STATE.equals(prop)) {
+		} else if (DebuggerModel.ARG_STATE.equals(prop)) {
+			if (mainPanel != null) {
 				if (model.getDebuggerModel().getState() == DebuggerModel.NOT_RUNNING
 						|| !model.getDebuggerModel().isEnabled()) {
 					mainPanel.remove(debugPanel);
@@ -534,18 +418,21 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 					mainPanel.add(BorderLayout.NORTH, debugPanel);
 				}
 			}
-			// LEGO
-			else if (Utils.LEGO && LegoModel.LEGO_UPLOAD.equals(prop)) {
-				if (model.getLegoModel().getState() == LegoModel.SUCCESS) {
-					JOptionPane.showMessageDialog(editor, Utils.getResource("workbench.lego.success"));
-				} else if (model.getLegoModel().getState() == LegoModel.FAILURE) {
-					JOptionPane.showMessageDialog(editor, Utils.getResource("workbench.lego.failure"));
-				}
+		} else if (Utils.LEGO && LegoModel.LEGO_UPLOAD.equals(prop)) {
+			if (model.getLegoModel().getState() == LegoModel.SUCCESS) {
+				JOptionPane.showMessageDialog(editor, Utils.getResource("workbench.lego.success"));
+			} else if (model.getLegoModel().getState() == LegoModel.FAILURE) {
+				JOptionPane.showMessageDialog(editor, Utils.getResource("workbench.lego.failure"));
 			}
-		
+		}
+
+		if (mainPanel != null) {
 			mainPanel.revalidate();
 			mainPanel.repaint();
 		}
+	}
+
+	// ---------------- Getters ----------------
 
 	public JFrame getSimulationFrame() {
 		return simulation;
@@ -562,6 +449,8 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 	public JFrame get3DSimulationFrame() {
 		return opengl;
 	}
+
+	// ---------------- WindowFocusListener ----------------
 
 	@Override
 	public void windowGainedFocus(WindowEvent e) {

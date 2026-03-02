@@ -1,102 +1,113 @@
 package de.hamster.compiler.view;
 
+import de.hamster.compiler.controller.CompilerController;
+import de.hamster.compiler.model.CompilerModel;
+import de.hamster.workbench.ForwardAction;
+import de.hamster.workbench.Utils;
 import java.awt.Dimension;
-import java.util.Observable;
-import java.util.Observer;
-
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.Box;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
-
-import de.hamster.compiler.controller.CompilerController;
-import de.hamster.compiler.model.CompilerModel;
-import de.hamster.model.HamsterFile;
-import de.hamster.workbench.ForwardAction;
-import de.hamster.workbench.Utils;
-import de.hamster.workbench.Workbench;
+import javax.swing.SwingUtilities;
 
 /**
- * Diese Klasse fuegt den Kompilieren Knopf in die Toolbar ein und erzeugt ein
- * Menue mit einem Item Kompilieren.
- * 
- * @author $Author: djasper $
- * @version $Revision: 1.1 $
+ * Diese Klasse fügt den Kompilieren-Knopf in die Toolbar ein und erzeugt ein
+ * Menü mit einem Item "Kompilieren".
+ *
+ * Modernisiert: PropertyChangeListener statt java.util.Observable/Observer.
+ *
+ * @author $Author: djasper, jrahn $
+ * @version $Revision: 1.2 $
  */
-public class CompilerTools implements Observer {
+public class CompilerTools implements PropertyChangeListener {
+
 	/**
 	 * Das Model dieser Komponente
 	 */
-	protected CompilerModel compilerModel;
-	
+	protected final CompilerModel compilerModel;
+
 	/**
 	 * Der Controller (Daniel, 08.04.2007)
 	 */
-	protected CompilerController controller;
-	
+	protected final CompilerController controller;
+
 	/**
-	 * Diese Aktion loest das Einstellen des CLASSPATH aus.
+	 * Diese Aktion löst das Einstellen des CLASSPATH aus.
 	 */
 	public class ClasspathAction extends ForwardAction {
 		public ClasspathAction() {
 			super("compiler.classpath", CompilerController.ACTION_CLASSPATH);
 		}
 	}
-	ClasspathAction classpathAction = new ClasspathAction();
-	
+	private final ClasspathAction classpathAction = new ClasspathAction();
+
 	/**
-	 * Diese Aktion loest das Kompilieren aus.
+	 * Diese Aktion löst das Kompilieren aus.
 	 */
 	public class CompileAction extends ForwardAction {
 		public CompileAction() {
 			super("compiler.compile", CompilerController.ACTION_COMPILE);
 		}
 	}
-	CompileAction compileAction = new CompileAction();
+	private final CompileAction compileAction = new CompileAction();
 
 	/**
 	 * Der Konstruktor
-	 * 
-	 * @param model
-	 *            Das Model der Compiler-Komponente
-	 * @param controller
-	 *            Der Controller der Compiler-Komponente
+	 *
+	 * @param model      Das Model der Compiler-Komponente
+	 * @param controller Der Controller der Compiler-Komponente
 	 */
 	public CompilerTools(CompilerModel model, CompilerController controller) {
 		this.compilerModel = model;
-		model.addObserver(this);
+		this.controller = controller;
 
-		JMenu compileMenu = controller.getWorkbench().getView().findMenu(
-				"editor", "compile");
+		// "Leaking this in constructor" vermeiden: Listener nach Konstruktor-Ende registrieren
+		SwingUtilities.invokeLater(() -> this.compilerModel.addPropertyChangeListener(CompilerTools.this));
+
+		JMenu compileMenu = controller.getWorkbench().getView().findMenu("editor", "compile");
 		compileMenu.add(new JMenuItem(compileAction));
 		compileMenu.add(new JMenuItem(classpathAction));
 
-		JToolBar toolBar = controller.getWorkbench().getView().findToolBar(
-				"editor");
+		JToolBar toolBar = controller.getWorkbench().getView().findToolBar("editor");
 		toolBar.add(Box.createRigidArea(new Dimension(11, 11)));
 		toolBar.add(Utils.createButton(compileAction));
 
 		compileAction.addActionListener(controller);
 		classpathAction.addActionListener(controller);
-		
+
 		compileAction.setEnabled(false);
-		// CLASSPATH kann nicht eingestellt werden, wenn lokal ausgefuehrt wird
-		//classpathAction.setEnabled(!Utils.runlocally);
+		// CLASSPATH kann nicht eingestellt werden, wenn lokal ausgeführt wird
+		// classpathAction.setEnabled(!Utils.runlocally);
 	}
 
 	/**
-	 * Ueber diese Methode kann das CompilerModel die Tools benachrichtigen.
+	 * Reagiert auf Änderungen des CompilerModels.
+	 * (Aktuell ist hier kein UI-Update nötig – aber die Schnittstelle ist vorbereitet.)
 	 */
-	public void update(Observable arg0, Object arg1) {
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// Falls du später reagieren willst:
+		// if (CompilerModel.COMPILER_ERRORS.equals(evt.getPropertyName())) { ... }
 	}
-	
+
+	/**
+	 * Optional aber sinnvoll: beim Entfernen aus der UI wieder abmelden.
+	 * (Falls CompilerTools nie "entfernt" wird, schadet es trotzdem nicht.)
+	 */
+	public void dispose() {
+		compilerModel.removePropertyChangeListener(this);
+	}
+
 	// Martin
 	/**
-	 * Mit dieser Funktion koennen die Buttons zum Compilieren deaktiviert werden.
+	 * Mit dieser Funktion können die Buttons zum Kompilieren deaktiviert werden.
 	 */
 	public void setButtonsVisible(boolean visible) {
 		compileAction.setEnabled(visible);
-		// Daniel: Classpath muss ja nicht deaktiviert werden (haengt von runlocally ab)
+		// Daniel: Classpath muss ja nicht deaktiviert werden (hängt von runlocally ab)
 		// classpathAction.setEnabled(visible);
 	}
 }

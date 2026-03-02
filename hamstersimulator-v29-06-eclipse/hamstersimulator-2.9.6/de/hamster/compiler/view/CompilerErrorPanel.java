@@ -1,51 +1,52 @@
 package de.hamster.compiler.view;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.util.Observable;
-import java.util.Observer;
-
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
 import de.hamster.compiler.controller.CompilerController;
 import de.hamster.compiler.model.CompilerModel;
 import de.hamster.compiler.model.JavaError;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 /**
- * Diese Klasse packt einen ErrorTable in eine ScrollPanes und updated diesen
- * bei Aenderung des Models
- * 
- * @author $Author: djasper $
- * @version $Revision: 1.1 $
+ * Diese Klasse packt einen ErrorTable in eine ScrollPane und aktualisiert diesen
+ * bei Änderung des Models.
+ *
+ * Modernisiert: verwendet PropertyChangeListener statt java.util.Observable/Observer.
+ *
+ * @author $Author: djasper, jrahn $
+ * @version $Revision: 1.2 $
  */
-public class CompilerErrorPanel extends JPanel implements Observer {
+public class CompilerErrorPanel extends JPanel implements PropertyChangeListener {
+
 	/**
 	 * Der ErrorTable
 	 */
-	protected ErrorTable errorTable;
+	protected final ErrorTable errorTable;
 
 	/**
-	 * Die Model-Komponente, dessen Aenderungen ueberwacht und Daten angezeigt
-	 * werden.
+	 * Die Model-Komponente, deren Änderungen überwacht und angezeigt werden.
 	 */
-	protected CompilerModel compilerModel;
+	protected final CompilerModel compilerModel;
 
 	/**
 	 * Der Konstruktor
-	 * 
-	 * @param model
-	 *            Das Model der Compiler-Komponente
-	 * @param controller
-	 *            Der Controller der Compiler-Komponente
+	 *
+	 * @param model      Das Model der Compiler-Komponente
+	 * @param controller Der Controller der Compiler-Komponente
 	 */
 	public CompilerErrorPanel(CompilerModel model, CompilerController controller) {
 		super(new BorderLayout());
 
 		this.compilerModel = model;
-		model.addObserver(this);
 
-		errorTable = new ErrorTable();
+		// "Leaking this in constructor" vermeiden: Listener nach Konstruktor-Ende registrieren
+		SwingUtilities.invokeLater(() -> this.compilerModel.addPropertyChangeListener(CompilerErrorPanel.this));
+
+		this.errorTable = new ErrorTable();
 		JScrollPane scrollPane = new JScrollPane(errorTable);
 		add(BorderLayout.CENTER, scrollPane);
 
@@ -54,19 +55,44 @@ public class CompilerErrorPanel extends JPanel implements Observer {
 	}
 
 	/**
-	 * Ueber diese Methode benachrichtigt das Model das ErrorPanel ueber eine
-	 * Aenderung
+	 * Reagiert auf Änderungen des CompilerModels.
 	 */
-	public void update(Observable o, Object arg) {
-		((ErrorTableModel) errorTable.getModel()).setErrors(compilerModel
-				.getCompilerErrors());
-		doLayout();
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// Optional: nur auf das relevante Event reagieren
+		if (!CompilerModel.COMPILER_ERRORS.equals(evt.getPropertyName())) {
+			return;
+		}
+
+		// UI-Update immer auf EDT
+		if (SwingUtilities.isEventDispatchThread()) {
+			updateTable();
+		} else {
+			SwingUtilities.invokeLater(this::updateTable);
+		}
+	}
+
+	private void updateTable() {
+		((ErrorTableModel) errorTable.getModel()).setErrors(compilerModel.getCompilerErrors());
+
+		// revalidate/repaint ist in Swing die bessere Wahl als doLayout()
+		revalidate();
+		repaint();
 	}
 
 	/**
-	 * Liefert den ausgewaehlten Fehler aus dem ErrorTable.
-	 * 
-	 * @return null wenn kein Fehler ausgewaehlt ist, den Fehler sonst.
+	 * Wichtig: wenn das Panel entfernt/geschlossen wird, Listener sauber abmelden.
+	 */
+	@Override
+	public void removeNotify() {
+		compilerModel.removePropertyChangeListener(this);
+		super.removeNotify();
+	}
+
+	/**
+	 * Liefert den ausgewählten Fehler aus dem ErrorTable.
+	 *
+	 * @return null wenn kein Fehler ausgewählt ist, sonst der Fehler.
 	 */
 	public JavaError getSelectedError() {
 		ErrorTableModel model = (ErrorTableModel) errorTable.getModel();
