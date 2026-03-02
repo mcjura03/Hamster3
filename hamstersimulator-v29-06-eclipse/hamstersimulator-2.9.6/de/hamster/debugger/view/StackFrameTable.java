@@ -1,39 +1,39 @@
 package de.hamster.debugger.view;
 
+import com.sun.jdi.StackFrame;
+import de.hamster.debugger.controller.DebuggerController;
+import de.hamster.debugger.model.DebuggerModel;
+import de.hamster.workbench.Utils;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
-
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
-import com.sun.jdi.StackFrame;
-
-import de.hamster.debugger.controller.DebuggerController;
-import de.hamster.debugger.model.DebuggerModel;
-
-import de.hamster.workbench.Utils;
-
 /**
- * @author $Author: djasper $
- * @version $Revision: 1.1 $
+ * @author $Author: djasper, jrahn $
+ * @version $Revision: 1.2 $
  */
-public class StackFrameTable extends JTable implements Observer {
-	private StackFrameTableModel tableModel;
+public class StackFrameTable extends JTable implements PropertyChangeListener {
 
-	private DebuggerModel model;
-	private DebuggerController controller;
+	private final StackFrameTableModel tableModel;
+
+	private final DebuggerModel model;
+	private final DebuggerController controller;
 
 	public StackFrameTable(DebuggerModel model, DebuggerController controller) {
 		super(new StackFrameTableModel());
 		this.model = model;
 		this.controller = controller;
-		model.addObserver(this);
 
-		tableModel = (StackFrameTableModel) getModel();
+		// alt: model.addObserver(this);
+		// neu:
+		javax.swing.SwingUtilities.invokeLater(() -> this.model.addPropertyChangeListener(StackFrameTable.this));
+
+		this.tableModel = (StackFrameTableModel) getModel();
 
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
@@ -46,22 +46,33 @@ public class StackFrameTable extends JTable implements Observer {
 
 		getColumnModel().getColumn(1).setHeaderValue(Utils.getResource("debugger.programm"));
 		getColumnModel().getColumn(2).setHeaderValue(Utils.getResource("debugger.funktion"));
-
 		getColumnModel().getColumn(3).setHeaderValue(Utils.getResource("debugger.zeile"));
 	}
 
-	public void update(Observable o, Object arg) {
-		if (arg == DebuggerModel.ARG_STATE) {
-			if (model.getState() == DebuggerModel.NOT_RUNNING) {
-				tableModel.setStackFrames(new ArrayList());
-			} else if ((model.getState() == DebuggerModel.PAUSED || model
-					.isSuspended())
-					&& model.isEnabled() && model.getStackFrames() != null) {
-				tableModel.setStackFrames(model.getStackFrames());
-				addRowSelectionInterval(0, 0);
-			} else {
-				tableModel.setStackFrames(new ArrayList());
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// alt: update(Observable o, Object arg)
+		// neu: evt.getPropertyName()
+		if (!DebuggerModel.ARG_STATE.equals(evt.getPropertyName())) {
+			return;
+		}
+
+		if (model.getState() == DebuggerModel.NOT_RUNNING) {
+			tableModel.setStackFrames(new ArrayList<StackFrame>());
+			return;
+		}
+
+		if ((model.getState() == DebuggerModel.PAUSED || model.isSuspended())
+				&& model.isEnabled()
+				&& model.getStackFrames() != null) {
+			tableModel.setStackFrames(model.getStackFrames());
+
+			// Nur selektieren, wenn mindestens eine Zeile existiert (verhindert mögliche Exceptions)
+			if (tableModel.getRowCount() > 0) {
+				setRowSelectionInterval(0, 0);
 			}
+		} else {
+			tableModel.setStackFrames(new ArrayList<StackFrame>());
 		}
 	}
 
@@ -69,12 +80,15 @@ public class StackFrameTable extends JTable implements Observer {
 		return tableModel.getStackFrame(getSelectedRow());
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		super.valueChanged(e);
-		if (e.getValueIsAdjusting())
+		if (e.getValueIsAdjusting()) {
 			return;
+		}
 		if (getSelectedRowCount() != 0) {
-			controller.actionPerformed(new ActionEvent(this,
+			controller.actionPerformed(new ActionEvent(
+					this,
 					ActionEvent.ACTION_PERFORMED,
 					DebuggerController.ACTION_FRAME));
 		}
