@@ -1,62 +1,88 @@
 package de.hamster.debugger.view;
 
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.Value;
-
 import de.hamster.debugger.model.DebuggerModel;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 /**
  * TODO: Aktualisierung
- * @author $Author: djasper $
- * @version $Revision: 1.1 $
+ * 
+ * @author $Author: djasper, jrahn $
+ * @version $Revision: 1.2 $
  */
-public class VariableViewer extends JTree implements Observer {
-	DefaultMutableTreeNode root;
-	DefaultTreeModel model;
-	
-	DebuggerModel debuggerModel;
+public class VariableViewer extends JTree implements PropertyChangeListener {
+
+	private final DefaultMutableTreeNode root;
+	private DefaultTreeModel model;
+
+	private final DebuggerModel debuggerModel;
 
 	public VariableViewer(DebuggerModel debuggerModel) {
 		super(new DefaultMutableTreeNode());
-		model = (DefaultTreeModel) getModel();
+		this.model = (DefaultTreeModel) getModel();
 		this.debuggerModel = debuggerModel;
-		debuggerModel.addObserver(this);
-		root = (DefaultMutableTreeNode) model.getRoot();
+
+		this.root = (DefaultMutableTreeNode) this.model.getRoot();
 		setRootVisible(false);
 		setShowsRootHandles(true);
+
+		// alt: debuggerModel.addObserver(this);
+		// neu (und "Leaking this" vermeiden):
+		SwingUtilities.invokeLater(() -> this.debuggerModel.addPropertyChangeListener(VariableViewer.this));
 	}
 
 	public void showVariable(StackFrame frame) {
 		root.removeAllChildren();
 		root.add(new VariableTreeNode("this", frame.thisObject()));
 		try {
-			List variables = frame.visibleVariables();
+			// Generics statt raw List
+			List<LocalVariable> variables = frame.visibleVariables();
 			for (int i = 0; i < variables.size(); i++) {
-				LocalVariable variable = (LocalVariable) variables.get(i);
+				LocalVariable variable = variables.get(i);
 				Value value = frame.getValue(variable);
 				root.add(new VariableTreeNode(variable.name(), value));
 			}
 		} catch (AbsentInformationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		model = new DefaultTreeModel(root);
 		setModel(model);
 	}
 
-	public void update(Observable o, Object arg) {
-		if(debuggerModel.getState() == DebuggerModel.NOT_RUNNING) {
-			model.setRoot(new DefaultMutableTreeNode());
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// Wir reagieren nur auf State-Änderungen
+		if (!DebuggerModel.ARG_STATE.equals(evt.getPropertyName())) {
+			return;
 		}
+
+		if (debuggerModel.getState() == DebuggerModel.NOT_RUNNING) {
+			// auf dem EDT updaten
+			if (SwingUtilities.isEventDispatchThread()) {
+				clearTree();
+			} else {
+				SwingUtilities.invokeLater(this::clearTree);
+			}
+		}
+	}
+
+	private void clearTree() {
+		DefaultMutableTreeNode emptyRoot = new DefaultMutableTreeNode();
+		model.setRoot(emptyRoot);
+		setModel(model);
+	}
+
+	// Optional: falls du später sauber aufräumen willst
+	public void dispose() {
+		debuggerModel.removePropertyChangeListener(this);
 	}
 }
