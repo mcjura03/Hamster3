@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Workbench",
+            "request": "launch",
+            "mainClass": "de.hamster.workbench.Workbench",
+            "projectName": "hamstersimulator-2.9.6_b053bec5"
+        },
+        {
+            "type": "java",
+            "name": "Launch Java Program",
+            "request": "launch",
+            "mainClass": ""
+        },
+        {
+            "type": "java",
+            "name": "Hamstersimulator (run.java)",
+            "request": "launch",
+            "mainClass": "de.hamster.run",
+            "cwd": "${workspaceFolder}/hamstersimulator-2.9.6",
+            "console": "internalConsole"
+        }
+    ]
+  }

@@ -1,5 +1,12 @@
 package de.hamster.workbench;
 
+import de.hamster.compiler.model.CompilerModel;
+import de.hamster.console.Console;
+import de.hamster.debugger.model.DebuggerModel;
+import de.hamster.lego.model.LegoModel;
+import de.hamster.simulation.view.DialogTerminal;
+import de.hamster.simulation.view.multimedia.opengl.J3DFrame;
+import de.hamster.simulation.view.multimedia.opengl.OpenGLController;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
@@ -22,7 +29,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -33,14 +39,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
-
-import de.hamster.compiler.model.CompilerModel;
-import de.hamster.console.Console;
-import de.hamster.debugger.model.DebuggerModel;
-import de.hamster.lego.model.LegoModel;
-import de.hamster.simulation.view.DialogTerminal;
-import de.hamster.simulation.view.multimedia.opengl.J3DFrame;
-import de.hamster.simulation.view.multimedia.opengl.OpenGLController;
 
 /**
  * View-Teil der Werkbank.
@@ -362,7 +360,7 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 			toolBar = new JToolBar(resources.getString("toolbar." + id + ".text"));
 			toolBar.setMargin(new Insets(1, 1, 0, 0));
 			toolBar.setFloatable(false);
-			toolBar.setBackground(new Color(255, 215, 180));
+			toolBar.setBackground(new Color(200, 200, 200));
 			toolBars.put(id, toolBar);
 		}
 		return toolBar;

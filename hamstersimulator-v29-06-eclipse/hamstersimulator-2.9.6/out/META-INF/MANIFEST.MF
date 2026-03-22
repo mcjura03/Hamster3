@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: lib/tools.jar lib/bcel-5.1.jar lib/bluecove.jar lib/classes.jar lib/commons-cli-1.0.jar lib/cpptasks.jar lib/pccomm.jar lib/pctools.jar lib/jtools.jar lib/substance.jar lib/jruby.jar lib/jython.jar lib/gluegen-rt.jar lib/jogl-all.jar
+Main-Class: de.hamster.workbench.Workbench
+SplashScreen-Image: splashscreen.gif

@@ -309,13 +309,12 @@ public class TabbedTextArea extends JPanel implements PropertyChangeListener,
 		int index = this.getIndex(textArea);
 		if (evt.getPropertyName() == HamsterFile.MODIFIED) {
 			if (((Boolean) evt.getNewValue()).booleanValue()) {
-				this.tabbedPane.setIconAt(index, Utils.getIcon("Save16.gif"));
+				this.tabbedPane.setIconAt(index, Utils.getIcon("save64.png"));
 			} else {
 				this.tabbedPane.setIconAt(index, null);
 			}
 		} else if (evt.getPropertyName() == HamsterFile.LOCKED) {
-			if (((Boolean) evt.getNewValue()).booleanValue()) {
-				this.tabbedPane.setIconAt(index, Utils.getIcon("Play16.gif"));
+			if (((Boolean) evt.getNewValue()).booleanValue()) {"play64.png"));
 				textArea.setEditable(false);
 				textArea.setBackground(new Color(230, 230, 230)); // getBackground());
 				this.lock(true);

@@ -1,0 +1,29 @@
+Materials data/materials.ASE
+
+#       id file
+Keyframe 0 data/stehen01.ASE
+Keyframe 1 data/stehen02.ASE
+Keyframe 2 data/stehen03.ASE
+Keyframe 3 data/laufen_loop01.ASE
+Keyframe 4 data/laufen_loop02.ASE
+Keyframe 5 data/laufen_loop03.ASE
+Keyframe 6 data/laufen_loop04.ASE
+Keyframe 7 data/laufen_loop05.ASE
+Keyframe 8 data/laufen_loop06.ASE
+
+#        id name   successor
+Animation 0 stehen -1
+#  ani-idkeyframe duration
+Step 0 0 1500
+Step 0 1 1500
+Step 0 2 1500
+Step 0 0 1500
+Step 0 1 1500
+
+Animation 1 laufen -1
+Step 1 3 70
+Step 1 4 70
+Step 1 5 70
+Step 1 6 70
+Step 1 7 70
+Step 1 8 70

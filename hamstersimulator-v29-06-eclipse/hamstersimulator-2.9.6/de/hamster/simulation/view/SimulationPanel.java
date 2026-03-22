@@ -1,5 +1,8 @@
 package de.hamster.simulation.view;
 
+import de.hamster.simulation.model.Hamster;
+import de.hamster.simulation.model.SimulationModel;
+import de.hamster.workbench.Utils;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -9,16 +12,9 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.FilteredImageSource;
 import java.util.Observable;
 import java.util.Observer;
-
-import javax.swing.JButton;
 import javax.swing.JPanel;
-
-import de.hamster.simulation.model.Hamster;
-import de.hamster.simulation.model.SimulationModel;
-import de.hamster.workbench.Utils;
 
 /**
  * @author $Author: djasper $
@@ -52,11 +48,11 @@ public class SimulationPanel extends JPanel implements Observer, MouseMotionList
 		model.addObserver(this);
 		this.tools = tools;
 
-		this.zoom = 32;  // 3
+		this.zoom = 64;  // 3
 		this.loadImages();
 		this.createCursors();
 		this.addMouseMotionListener(this);
-		this.setBackground(new Color(240, 244, 246)); // dibo 230309
+		this.setBackground(new Color(200, 200, 200)); // dibo 230309
 		
 		//font = new Font("SansSerif", Font.BOLD, 12);
 	}
@@ -69,9 +65,9 @@ public class SimulationPanel extends JPanel implements Observer, MouseMotionList
 		orig[2] = Utils.getImage("hamstersouth.png");
 		orig[3] = Utils.getImage("hamsterwest.png");
 		for (int i = 0; i < this.hamster.length; i++) {
-			ColorFilter c = new ColorFilter(i);
+			//ColorFilter c = new ColorFilter(i);
 			for (int j = 0; j < 4; j++) {
-				this.hamster[i][j] = this.createImage(new FilteredImageSource(orig[j].getSource(), c));
+				this.hamster[i][j] = this.createImage(orig[j].getSource());
 
 			}
 		}
@@ -79,7 +75,7 @@ public class SimulationPanel extends JPanel implements Observer, MouseMotionList
 		for (int i = 0; i < this.corn.length; i++) {
 			this.corn[i] = Utils.getImage(i + 1 + "Corn32.png");
 		}
-		this.wall = Utils.getImage("Wall32.png");
+		this.wall = Utils.getImage("Wall128.png"); // new Design /JRahn
 
 	}
 

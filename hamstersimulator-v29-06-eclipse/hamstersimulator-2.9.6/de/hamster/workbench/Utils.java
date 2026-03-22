@@ -1,5 +1,12 @@
 package de.hamster.workbench;
 
+import de.hamster.editor.view.FSMPanelPrintable;
+import de.hamster.editor.view.FlowchartPanelPrintable;
+import de.hamster.editor.view.ScratchPanelPrintable;
+import de.hamster.editor.view.TextAreaPrintable;
+import de.hamster.flowchart.FlowchartPanel;
+import de.hamster.fsm.view.FsmPanel;
+import de.hamster.scratch.ScratchPanel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
@@ -14,7 +21,6 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.ResourceBundle;
-
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.JobName;
@@ -26,14 +32,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
-
-import de.hamster.editor.view.FSMPanelPrintable;
-import de.hamster.editor.view.FlowchartPanelPrintable;
-import de.hamster.editor.view.ScratchPanelPrintable;
-import de.hamster.editor.view.TextAreaPrintable;
-import de.hamster.flowchart.FlowchartPanel;
-import de.hamster.fsm.view.FsmPanel;
-import de.hamster.scratch.ScratchPanel;
 
 /**
  * Diese Klasse enthaelt Hilfsmethoden und Konstanten, die im Hamster-Simulator
@@ -263,7 +261,8 @@ public class Utils {
 
 	/**
 	 * Diese Methode erzeugt einen Button zu einer Action. Dieser hat dann das
-	 * Design, das fuer den Einsatz in einer Toolbar ausgerichtet ist.
+	 * Design, das fuer den Einsatz in einer Toolbar ausgerichtet ist. Im neuen Design ist der Hinter
+	 * des Buttons transparent und es wird nur das Icon angezeigt. Es wird kein Rahmen um den Button gezeichnet.
 	 * 
 	 * @param action
 	 *            Die Action, zu der der Knopf erzeugt wird
@@ -271,15 +270,26 @@ public class Utils {
 	 */
 	public static JButton createButton(Action action) {
 		JButton b = new JButton(action);
+	
 		b.setText(null);
 		b.setMnemonic(0);
 		b.setMargin(TOOLBAR_MARGIN);
+	
+		// Button unsichtbar machen
+		b.setBorderPainted(false);
+		b.setContentAreaFilled(false);
+		b.setFocusPainted(false);
+		b.setOpaque(false);
+	
 		return b;
 	}
 
 	/**
 	 * Diese Methode erzeugt einen ToggleButton zu einer Action. Dieser hat dann
 	 * das Design, das fuer den Einsatz in einer Toolbar ausgerichtet ist.
+	 * 
+	 *  Im neuen Design ist der Hinter
+	 * des Buttons transparent und es wird nur das Icon angezeigt. Es wird kein Rahmen um den Button gezeichnet.
 	 * 
 	 * @param action
 	 *            Die Action, zu der der Knopf erzeugt wird
@@ -290,6 +300,13 @@ public class Utils {
 		b.setText(null);
 		b.setMnemonic(0);
 		b.setMargin(TOOLBAR_MARGIN);
+
+		// Button unsichtbar machen
+		b.setBorderPainted(false);
+		b.setContentAreaFilled(false);
+		b.setFocusPainted(false);
+		b.setOpaque(false);
+
 		return b;
 	}
 
