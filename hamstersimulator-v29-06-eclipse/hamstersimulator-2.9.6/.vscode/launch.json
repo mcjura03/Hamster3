@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "HSTest",
+            "request": "launch",
+            "mainClass": "de.hamster.HSTest",
+            "projectName": "hamstersimulator-2.9.6_b053bec5"
+        },
+        {
+            "type": "java",
             "name": "Workbench",
             "request": "launch",
             "mainClass": "de.hamster.workbench.Workbench",
