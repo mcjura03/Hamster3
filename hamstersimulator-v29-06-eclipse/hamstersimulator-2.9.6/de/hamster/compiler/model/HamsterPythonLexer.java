@@ -16,9 +16,10 @@ public class HamsterPythonLexer extends HamsterLexer {
 				"def", "for", "lambda", "try" };
 
 		// Rufe wiederholt die Initialisierungsmethode auf.
-		keywords = new HashMap();
-		for (int i = 0; i < KEYWORDS.length; i++)
-			keywords.put(KEYWORDS[i], KEYWORDS[i]);
+		keywords = new HashMap<>(); // jrahn: Raw HashMap durch generische HashMap ersetzt
+		for (String keyword : KEYWORDS) { // jrahn: for-each Schleife statt Indexschleife
+			keywords.put(keyword, keyword); // jrahn: typsichere Befüllung
+		}
 	}
 
 	/**

@@ -21,9 +21,10 @@ public class HamsterJavaScriptLexer extends HamsterLexer {
 				"var", "void", "while", "with" };
 
 		// Rufe wiederholt die Initialisierungsmethode auf.
-		keywords = new HashMap();
-		for (int i = 0; i < KEYWORDS.length; i++)
-			keywords.put(KEYWORDS[i], KEYWORDS[i]);
+		keywords = new HashMap<>(); // jrahn: Raw HashMap durch generische HashMap ersetzt
+		for (String keyword : KEYWORDS) { // jrahn: sprechender Variablenname und for-each verwendet
+			keywords.put(keyword, keyword); // jrahn: typsicher, sofern keywords in HamsterLexer generisch deklariert ist
+		}
 	}
 
 	/**

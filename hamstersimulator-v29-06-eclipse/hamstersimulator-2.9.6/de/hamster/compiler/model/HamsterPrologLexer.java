@@ -2,32 +2,31 @@ package de.hamster.compiler.model;
 
 import java.util.HashMap;
 
-
 /**
  * Diese Klasse implementiert einen Lexer fuer Hamster-Prolog-Programme.
  * 
- * 	@author Andreas (Prolog)
+ * @author Andreas (Prolog)
  */
-public class HamsterPrologLexer extends HamsterLexer
-{
-	public HamsterPrologLexer() 
-	{
-		// Redefiniere die Schlüsselwort-Liste der Superklasse..
-		this.KEYWORDS = new String[]{"arg", "assert", "asserta", "assertz", "atom", "atomic",
+public class HamsterPrologLexer extends HamsterLexer {
+
+	public HamsterPrologLexer() {
+		// Redefiniere die Schluesselwort-Liste der Superklasse.
+		this.KEYWORDS = new String[] { "arg", "assert", "asserta", "assertz", "atom", "atomic",
 				"bagof", "div", "is", "mod", "call", "consult", "findall", "functor", "get", "get0",
 				"integer", "name", "nl", "nonvar", "nospy", "not", "notrace", "numbervars", "put",
 				"read", "reconsult", "repeat", "retract", "see", "seen", "setof", "spy", "tab", "tell",
 				"told", "trace", "ttyflush", "var", "write", "listing", "true", "false", "help",
 				"debug", "nodebug", "debugging", "tracing", "break", "abort", "halt", "chdir",
 				"make", "include", "porttray_clause", "cyclic_term", "acyclic_term", "number", "string",
-				"apropos","retractall"};
-		
-		// Rufe wiederholt die Initialisierungsmethode auf. 
-		keywords = new HashMap();
-		for (int i = 0; i < KEYWORDS.length; i++)
-			keywords.put(KEYWORDS[i], KEYWORDS[i]);
+				"apropos", "retractall" };
+
+		// Rufe wiederholt die Initialisierungsmethode auf.
+		keywords = new HashMap<>(); // jrahn: Raw HashMap durch generische HashMap ersetzt
+		for (String keyword : KEYWORDS) { // jrahn: for-each Schleife statt Indexschleife
+			keywords.put(keyword, keyword); // jrahn: typsichere BefÃ¼llung
+		}
 	}
-	
+
 	/*
 	@Override
 	public JavaToken nextToken() {

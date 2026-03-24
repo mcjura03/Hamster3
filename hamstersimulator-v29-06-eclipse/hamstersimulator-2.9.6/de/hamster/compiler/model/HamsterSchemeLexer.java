@@ -7,14 +7,14 @@ import java.util.HashMap;
  */
 public class HamsterSchemeLexer extends HamsterLexer {
 		
-	public HamsterSchemeLexer() 
-	{
-		this.KEYWORDS = new String[]{"define", 
-			"cdr", "car", "if", "cond", "cons"};
-		
-		// Rufe wiederholt die Initialisierungsmethode auf. 
-		keywords = new HashMap();
-		for (int i = 0; i < KEYWORDS.length; i++)
-			keywords.put(KEYWORDS[i], KEYWORDS[i]);
+	public HamsterSchemeLexer() {
+		this.KEYWORDS = new String[] { "define",
+				"cdr", "car", "if", "cond", "cons" };
+
+		// Rufe wiederholt die Initialisierungsmethode auf.
+		keywords = new HashMap<>(); // jrahn: Raw HashMap durch generische HashMap ersetzt
+		for (String keyword : KEYWORDS) { // jrahn: for-each Schleife statt Indexschleife
+			keywords.put(keyword, keyword); // jrahn: typsichere Befüllung
+		}
 	}
 }

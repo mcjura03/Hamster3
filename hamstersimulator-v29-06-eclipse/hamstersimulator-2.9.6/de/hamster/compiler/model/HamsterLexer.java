@@ -1,6 +1,7 @@
 package de.hamster.compiler.model;
 
 import java.util.HashMap;
+import java.util.Map; // jrahn: Map-Interface fÃ¼r typsichere Deklaration ergÃ¤nzt
 
 /**
  * Diese Klasse implementiert einen Lexer fuer Hamsterprogramme. Dieser
@@ -15,22 +16,22 @@ public class HamsterLexer {
 	 * Diese Schluesselwoerter kann der Lexer erkennen.
 	 */
 	// Prolog
-	// Andreas: musste das 'final' wegnehmen, da die Schlüsselwörtersich  bei der 
+	// Andreas: musste das 'final' wegnehmen, da die Schlï¿½sselwï¿½rtersich  bei der 
 	// Vererbung (beispielsweise beim HamsterPrologLexer) nicht umdefinieren lassen. 
-	public String[] KEYWORDS = {"abstract", "double", "int",
+	public String[] KEYWORDS = { "abstract", "double", "int",
 			"strictfp", "boolean", "else", "interface", "super", "break",
 			"extends", "long", "switch", "byte", "final", "native",
 			"synchronized", "case", "finally", "new", "this", "catch", "float",
 			"package", "throw", "char", "for", "private", "throws", "class",
 			"goto", "protected", "transient", "const", "if", "public", "try",
 			"continue", "implements", "return", "void", "default", "import",
-			"short", "volatile", "do", "instanceof", "static", "while"};
+			"short", "volatile", "do", "instanceof", "static", "while" };
 
 	/**
 	 * Die Schluesselwoerter werden aus Performanzgruenden in einen HashMap
 	 * gepackt.
 	 */
-	protected HashMap keywords;
+	protected Map<String, String> keywords; // jrahn: Raw HashMap durch typsichere Map ersetzt
 
 	public static final int PLAIN = 0;
 	public static final int COMMENT = 1;
@@ -54,9 +55,10 @@ public class HamsterLexer {
 	public void init() {
 		if (keywords != null)
 			return;
-		keywords = new HashMap();
-		for (int i = 0; i < KEYWORDS.length; i++)
-			keywords.put(KEYWORDS[i], KEYWORDS[i]);
+		keywords = new HashMap<>(); // jrahn: generische HashMap verwendet
+		for (String keyword : KEYWORDS) { // jrahn: for-each Schleife statt Indexschleife
+			keywords.put(keyword, keyword); // jrahn: typsichere BefÃ¼llung
+		}
 	}
 
 	/**
@@ -199,15 +201,21 @@ public class HamsterLexer {
 		} else if (Character.isJavaIdentifierStart(LL(0))) {
 			consumeIdentifier();
 		} else if (LL(0) == '/') {
-			if (LL(1) == '/') {
-				consumeSingleLineComment();
-				type = COMMENT;
-			} else if (LL(1) == '*') {
-				consumeMultiLineComment();
-				type = COMMENT;
-			} else
-				consumeCharacter();
+			switch (LL(1)) {
+				case '/':
+					consumeSingleLineComment();
+					type = COMMENT;
+					break;
+				case '*':
+					consumeMultiLineComment();
+					type = COMMENT;
+					break;
+				default:
+					consumeCharacter();
+					break;
+			}
 		} else if (LL(0) == '\"') {
+			// Additional handling for string literals can be added here
 			consumeStringLiteral();
 			type = LITERAL;
 		} else if (LL(0) == '\'') {
