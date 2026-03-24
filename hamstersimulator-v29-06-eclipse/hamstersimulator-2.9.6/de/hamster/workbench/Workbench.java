@@ -47,6 +47,7 @@ import de.hamster.scratch.ScratchHamster;
 import de.hamster.simulation.controller.SimulationController;
 import de.hamster.simulation.model.SimulationModel;
 import de.hamster.simulation.view.DialogTerminal;
+import de.hamster.simulation.view.multimedia.opengl.material.Color;
 
 /**
  * Diese Klasse implementiert den Controller der zentralen Werkbank. Die
@@ -649,6 +650,8 @@ public class Workbench {
 			UIManager.put("TabbedPane.light", new java.awt.Color(67, 67, 67)); // jrahn: helle Kante dunkel
 			UIManager.put("TabbedPane.shadow", new java.awt.Color(30, 30, 30)); // jrahn: Schatten anpassen
 			UIManager.put("TabbedPane.darkShadow", new java.awt.Color(10, 10, 10)); // jrahn: dunklen Schatten anpassen
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			JFrame.setDefaultLookAndFeelDecorated(false); // jrahn

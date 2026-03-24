@@ -5,9 +5,8 @@ import de.hamster.compiler.model.JavaToken;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.util.LinkedList;
-
-import javax.swing.SwingUtilities;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -98,28 +97,20 @@ public class HamsterDocument extends DefaultStyledDocument implements DocumentLi
 
 	void setAttributes(JavaToken t) {
 		switch (t.getType()) { // jrahn: if-Kette durch switch ersetzt
-			case HamsterLexer.COMMENT:
-				setCharacterAttributes(t.getStart(), t.getText().length(),
+			case HamsterLexer.COMMENT -> setCharacterAttributes(t.getStart(), t.getText().length(),
 						getStyle("comment"), true);
-				break;
-			case HamsterLexer.KEYWORD:
-				setCharacterAttributes(t.getStart(), t.getText().length(),
+			case HamsterLexer.KEYWORD -> setCharacterAttributes(t.getStart(), t.getText().length(),
 						getStyle("keyword"), true);
-				break;
-			case HamsterLexer.LITERAL:
-				setCharacterAttributes(t.getStart(), t.getText().length(),
+			case HamsterLexer.LITERAL -> setCharacterAttributes(t.getStart(), t.getText().length(),
 						getStyle("literal"), true);
-				break;
-			case HamsterLexer.METHOD: // jrahn: Methoden-Tokentyp ergänzt
+			case HamsterLexer.METHOD -> // jrahn: Methoden-Tokentyp ergänzt
 				setCharacterAttributes(t.getStart(), t.getText().length(),
 						getStyle("method"), true); // jrahn: Methodenstil anwenden
-				break;
-			default:
-				setCharacterAttributes(t.getStart(), t.getText().length(),
+			default -> setCharacterAttributes(t.getStart(), t.getText().length(),
 						getStyle("plain"), true);
-				break;
 		}
-	}
+            // jrahn: if-Kette durch switch ersetzt
+            	}
 
 	public boolean isHighlighting() {
 		return highlighting;

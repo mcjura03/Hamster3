@@ -1,5 +1,14 @@
 package de.hamster.editor.view;
 
+import de.hamster.editor.controller.EditorController;
+import de.hamster.model.HamsterFile;
+import de.hamster.prolog.controller.PrologController;
+import de.hamster.prolog.model.PrologHamster.TerObject;
+import de.hamster.simulation.model.SimulationModel;
+import de.hamster.simulation.model.Terrain;
+import de.hamster.workbench.Utils;
+import de.hamster.workbench.Workbench;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -24,246 +33,241 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
-
 import javax.swing.JFrame;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import de.hamster.editor.controller.EditorController;
-import de.hamster.model.HamsterFile;
-import de.hamster.prolog.controller.PrologController;
-import de.hamster.prolog.model.PrologHamster.TerObject;
-import de.hamster.simulation.model.SimulationModel;
-import de.hamster.simulation.model.Terrain;
-import de.hamster.workbench.Utils;
-import de.hamster.workbench.Workbench;
-
 /**
  * @author $Author: djasper $
  * @version $Revision: 1.10 $
  */
 public class FileTree extends JTree implements MouseListener,
-		DragGestureListener, DragSourceListener, DropTargetListener {
-	protected FilePopupMenu filePopupMenu;
-	protected EditorController controller;
+        DragGestureListener, DragSourceListener, DropTargetListener {
 
-	protected DragSource dragSource;
+    protected FilePopupMenu filePopupMenu;
+    protected EditorController controller;
 
-	public FileTree(EditorController controller) {
-		super(new FileTreeNode(HamsterFile.getHamsterFile(Utils.HOME)));
-		this.controller = controller;
-		filePopupMenu = new FilePopupMenu(controller);
+    protected DragSource dragSource;
 
-		setCellRenderer(new FileTreeCellRenderer());
-		addMouseListener(this);
-		getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
+    public FileTree(EditorController controller) {
+        super(new FileTreeNode(HamsterFile.getHamsterFile(Utils.HOME)));
+        this.controller = controller;
+        filePopupMenu = new FilePopupMenu(controller);
 
-		new DropTarget(this, this);
-		dragSource = DragSource.getDefaultDragSource();
-		dragSource.createDefaultDragGestureRecognizer(this,
-				DnDConstants.ACTION_COPY_OR_MOVE, this);
-	}
+        setCellRenderer(new FileTreeCellRenderer());
+        setBackground(new Color(67, 67, 67));
+        setForeground(Color.WHITE);
+        setOpaque(true);
 
-	public void update() {
-		TreePath t = getSelectionPath();
-		Enumeration expanded = getExpandedDescendants(new TreePath(getModel()
-				.getRoot()));
-		((FileTreeNode) getModel().getRoot()).update();
-		((DefaultTreeModel) getModel()).reload();
-		while (expanded != null && expanded.hasMoreElements()) {
-			TreePath tp = (TreePath) expanded.nextElement();
-			expandPath(tp);
-		}
-		setSelectionPath(t);
-	}
+        addMouseListener(this);
+        getSelectionModel().setSelectionMode(
+                TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-	public String getFilename() {
-		TreePath path = getLeadSelectionPath();
-		FileTreeNode node = (FileTreeNode) path.getLastPathComponent();
-		return node.getHamsterFile().getAbsolute();
-	}
+        new DropTarget(this, this);
+        dragSource = DragSource.getDefaultDragSource();
+        dragSource.createDefaultDragGestureRecognizer(this,
+                DnDConstants.ACTION_COPY_OR_MOVE, this);
+    }
 
-	public HamsterFile getFile(TreePath path) {
-		FileTreeNode node = (FileTreeNode) path.getLastPathComponent();
-		return node.getHamsterFile();
-	}
+    public void update() {
+        TreePath t = getSelectionPath();
+        Enumeration expanded = getExpandedDescendants(new TreePath(getModel()
+                .getRoot()));
+        ((FileTreeNode) getModel().getRoot()).update();
+        ((DefaultTreeModel) getModel()).reload();
+        while (expanded != null && expanded.hasMoreElements()) {
+            TreePath tp = (TreePath) expanded.nextElement();
+            expandPath(tp);
+        }
+        setSelectionPath(t);
+    }
 
-	public void mouseClicked(MouseEvent e) {
-		TreePath tp = getPathForLocation(e.getX(), e.getY());
-		if (tp == null)
-			return;
-		HamsterFile file = getFile(tp);
-		if (file.isTerrain()) {
-			SimulationModel simModel = Workbench.getWorkbench().getSimulation()
-					.getSimulationModel();
+    public String getFilename() {
+        TreePath path = getLeadSelectionPath();
+        FileTreeNode node = (FileTreeNode) path.getLastPathComponent();
+        return node.getHamsterFile().getAbsolute();
+    }
 
-			simModel.setTerrain(new Terrain(file.load()));
+    public HamsterFile getFile(TreePath path) {
+        FileTreeNode node = (FileTreeNode) path.getLastPathComponent();
+        return node.getHamsterFile();
+    }
 
-			// Prolog
-			if (Utils.PROLOG) {
-				PrologController.get().updateTerrainObject(
-						TerObject.TERRITORIUM);
-			}
+    public void mouseClicked(MouseEvent e) {
+        TreePath tp = getPathForLocation(e.getX(), e.getY());
+        if (tp == null)
+            return;
+        HamsterFile file = getFile(tp);
+        if (file.isTerrain()) {
+            SimulationModel simModel = Workbench.getWorkbench().getSimulation()
+                    .getSimulationModel();
 
-			if (e.getButton() == java.awt.event.MouseEvent.BUTTON1) {
-				JFrame simFrame = Workbench.getWorkbench().getView()
-						.getSimulationFrame();
-				if (!simFrame.isVisible()) {
-					simFrame.setVisible(true);
-					Workbench.winSim.setState(true);
-				}
-				simFrame.toFront();
-			}
-		} else {
-			filePopupMenu.setFile(file);
-			if (!getFile(tp).isDirectory())
-				controller.actionPerformed(new ActionEvent(this,
-						ActionEvent.ACTION_PERFORMED,
-						EditorController.FILE_OPEN));
-		}
-	}
+            simModel.setTerrain(new Terrain(file.load()));
 
-	public void mouseEntered(MouseEvent e) {
-	}
+            // Prolog
+            if (Utils.PROLOG) {
+                PrologController.get().updateTerrainObject(
+                        TerObject.TERRITORIUM);
+            }
 
-	public void mouseExited(MouseEvent e) {
-	}
+            if (e.getButton() == java.awt.event.MouseEvent.BUTTON1) {
+                JFrame simFrame = Workbench.getWorkbench().getView()
+                        .getSimulationFrame();
+                if (!simFrame.isVisible()) {
+                    simFrame.setVisible(true);
+                    Workbench.winSim.setState(true);
+                }
+                simFrame.toFront();
+            }
+        } else {
+            filePopupMenu.setFile(file);
+            if (!getFile(tp).isDirectory())
+                controller.actionPerformed(new ActionEvent(this,
+                        ActionEvent.ACTION_PERFORMED,
+                        EditorController.FILE_OPEN));
+        }
+    }
 
-	public void mousePressed(MouseEvent e) {
-		if (!e.isPopupTrigger())
-			return;
-		TreePath tp = getPathForLocation(e.getX(), e.getY());
-		if (tp == null)
-			return;
-		filePopupMenu.setFile(getFile(tp));
-		filePopupMenu.show(this, e.getX(), e.getY());
-	}
+    public void mouseEntered(MouseEvent e) {
+    }
 
-	public void mouseReleased(MouseEvent e) {
-		if (!e.isPopupTrigger())
-			return;
-		TreePath tp = getPathForLocation(e.getX(), e.getY());
-		if (tp == null)
-			return;
-		filePopupMenu.setFile(getFile(tp));
-		filePopupMenu.show(this, e.getX(), e.getY());
-	}
+    public void mouseExited(MouseEvent e) {
+    }
 
-	public FilePopupMenu getFilePopupMenu() {
-		return filePopupMenu;
-	}
+    public void mousePressed(MouseEvent e) {
+        if (!e.isPopupTrigger())
+            return;
+        TreePath tp = getPathForLocation(e.getX(), e.getY());
+        if (tp == null)
+            return;
+        filePopupMenu.setFile(getFile(tp));
+        filePopupMenu.show(this, e.getX(), e.getY());
+    }
 
-	// DragGuestureListener //
+    public void mouseReleased(MouseEvent e) {
+        if (!e.isPopupTrigger())
+            return;
+        TreePath tp = getPathForLocation(e.getX(), e.getY());
+        if (tp == null)
+            return;
+        filePopupMenu.setFile(getFile(tp));
+        filePopupMenu.show(this, e.getX(), e.getY());
+    }
 
-	public void dragGestureRecognized(DragGestureEvent dge) {
-		TreePath tp = getPathForLocation(dge.getDragOrigin().x, dge
-				.getDragOrigin().y);
-		if (tp == null)
-			return;
-		addSelectionPath(tp);
-		FileTreeNode ftn = (FileTreeNode) tp.getLastPathComponent();
-		if (ftn.getHamsterFile() != HamsterFile.getHamsterFile(Utils.HOME)) {
-			SimpleTransferable st = new SimpleTransferable(ftn.getHamsterFile()
-					.getFile());
-			dragSource.startDrag(dge, selectCursor(dge.getDragAction()), st,
-					this);
-		}
-	}
+    public FilePopupMenu getFilePopupMenu() {
+        return filePopupMenu;
+    }
 
-	private Cursor selectCursor(int action) {
-		switch (action) {
-		case DnDConstants.ACTION_MOVE:
-			return DragSource.DefaultMoveDrop;
-		case DnDConstants.ACTION_COPY:
-			return DragSource.DefaultCopyDrop;
-		case DnDConstants.ACTION_NONE:
-			return DragSource.DefaultMoveNoDrop;
-		}
-		return null;
-	}
+    // DragGuestureListener //
 
-	// DragSourceListener //
+    public void dragGestureRecognized(DragGestureEvent dge) {
+        TreePath tp = getPathForLocation(dge.getDragOrigin().x, dge
+                .getDragOrigin().y);
+        if (tp == null)
+            return;
+        addSelectionPath(tp);
+        FileTreeNode ftn = (FileTreeNode) tp.getLastPathComponent();
+        if (ftn.getHamsterFile() != HamsterFile.getHamsterFile(Utils.HOME)) {
+            SimpleTransferable st = new SimpleTransferable(ftn.getHamsterFile()
+                    .getFile());
+            dragSource.startDrag(dge, selectCursor(dge.getDragAction()), st,
+                    this);
+        }
+    }
 
-	public void dragEnter(DragSourceDragEvent dsde) {
-		dsde.getDragSourceContext().setCursor(
-				selectCursor(dsde.getDropAction()));
-	}
+    private Cursor selectCursor(int action) {
+        switch (action) {
+        case DnDConstants.ACTION_MOVE:
+            return DragSource.DefaultMoveDrop;
+        case DnDConstants.ACTION_COPY:
+            return DragSource.DefaultCopyDrop;
+        case DnDConstants.ACTION_NONE:
+            return DragSource.DefaultMoveNoDrop;
+        }
+        return null;
+    }
 
-	public void dragOver(DragSourceDragEvent dsde) {
-		dsde.getDragSourceContext().setCursor(
-				selectCursor(dsde.getDropAction()));
-	}
+    // DragSourceListener //
 
-	public void dropActionChanged(DragSourceDragEvent dsde) {
-	}
+    public void dragEnter(DragSourceDragEvent dsde) {
+        dsde.getDragSourceContext().setCursor(
+                selectCursor(dsde.getDropAction()));
+    }
 
-	public void dragDropEnd(DragSourceDropEvent dsde) {
-		controller.refreshFiles();
-	}
+    public void dragOver(DragSourceDragEvent dsde) {
+        dsde.getDragSourceContext().setCursor(
+                selectCursor(dsde.getDropAction()));
+    }
 
-	public void dragExit(DragSourceEvent dse) {
-		dse.getDragSourceContext().setCursor(
-				selectCursor(DnDConstants.ACTION_NONE));
-	}
+    public void dropActionChanged(DragSourceDragEvent dsde) {
+    }
 
-	// DropTargetLister //
-	public void dragEnter(DropTargetDragEvent dtde) {
-	}
+    public void dragDropEnd(DragSourceDropEvent dsde) {
+        controller.refreshFiles();
+    }
 
-	public void dragOver(DropTargetDragEvent dtde) {
-		TreePath tp = getPathForLocation(dtde.getLocation().x, dtde
-				.getLocation().y);
-		if (tp == null) {
-			dtde.rejectDrag();
-			return;
-		}
-		FileTreeNode ftn = (FileTreeNode) tp.getLastPathComponent();
-		if (ftn.isLeaf()) {
-			dtde.rejectDrag();
-		} else {
-			dtde.acceptDrag(dtde.getDropAction());
-		}
-	}
+    public void dragExit(DragSourceEvent dse) {
+        dse.getDragSourceContext().setCursor(
+                selectCursor(DnDConstants.ACTION_NONE));
+    }
 
-	public void dropActionChanged(DropTargetDragEvent dtde) {
-	}
+    // DropTargetLister //
+    public void dragEnter(DropTargetDragEvent dtde) {
+    }
 
-	public void drop(DropTargetDropEvent dtde) {
-		HamsterFile source = null;
-		dtde.acceptDrop(dtde.getDropAction());
-		try {
-			Transferable tr = dtde.getTransferable();
-			source = HamsterFile.getHamsterFile((File) ((List) tr
-					.getTransferData(DataFlavor.javaFileListFlavor)).get(0));
-		} catch (UnsupportedFlavorException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		TreePath tp = getPathForLocation(dtde.getLocation().x, dtde
-				.getLocation().y);
-		FileTreeNode ftn = null; // dibo 22(08/07
-		if (tp != null) {
-			ftn = (FileTreeNode) tp.getLastPathComponent();
-		}
-		if (ftn != null
-				&& (ftn.getHamsterFile().getAbsolute().startsWith(
-						source.getAbsolute() + Utils.FSEP) || ftn
-						.getHamsterFile().getAbsolute().equals(
-								source.getAbsolute()))) {
-			// System.out.println("geht nicht");
-		} else {
-			if (dtde.getDropAction() == DnDConstants.ACTION_COPY)
-				controller.copyFile(source, ftn.getHamsterFile());
-			if (dtde.getDropAction() == DnDConstants.ACTION_MOVE)
-				controller.moveFile(source, new File(ftn.getHamsterFile()
-						.getFile(), source.getFile().getName()));
-		}
-	}
+    public void dragOver(DropTargetDragEvent dtde) {
+        TreePath tp = getPathForLocation(dtde.getLocation().x, dtde
+                .getLocation().y);
+        if (tp == null) {
+            dtde.rejectDrag();
+            return;
+        }
+        FileTreeNode ftn = (FileTreeNode) tp.getLastPathComponent();
+        if (ftn.isLeaf()) {
+            dtde.rejectDrag();
+        } else {
+            dtde.acceptDrag(dtde.getDropAction());
+        }
+    }
 
-	public void dragExit(DropTargetEvent dte) {
-	}
+    public void dropActionChanged(DropTargetDragEvent dtde) {
+    }
+
+    public void drop(DropTargetDropEvent dtde) {
+        HamsterFile source = null;
+        dtde.acceptDrop(dtde.getDropAction());
+        try {
+            Transferable tr = dtde.getTransferable();
+            source = HamsterFile.getHamsterFile((File) ((List) tr
+                    .getTransferData(DataFlavor.javaFileListFlavor)).get(0));
+        } catch (UnsupportedFlavorException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        TreePath tp = getPathForLocation(dtde.getLocation().x, dtde
+                .getLocation().y);
+        FileTreeNode ftn = null;
+        if (tp != null) {
+            ftn = (FileTreeNode) tp.getLastPathComponent();
+        }
+        if (ftn != null
+                && (ftn.getHamsterFile().getAbsolute().startsWith(
+                        source.getAbsolute() + Utils.FSEP) || ftn
+                        .getHamsterFile().getAbsolute().equals(
+                                source.getAbsolute()))) {
+            // System.out.println("geht nicht");
+        } else {
+            if (dtde.getDropAction() == DnDConstants.ACTION_COPY)
+                controller.copyFile(source, ftn.getHamsterFile());
+            if (dtde.getDropAction() == DnDConstants.ACTION_MOVE)
+                controller.moveFile(source, new File(ftn.getHamsterFile()
+                        .getFile(), source.getFile().getName()));
+        }
+    }
+
+    public void dragExit(DropTargetEvent dte) {
+    }
 }
