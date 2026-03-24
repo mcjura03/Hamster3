@@ -1,11 +1,13 @@
 package de.hamster.editor.view;
 
+import de.hamster.compiler.model.HamsterLexer;
+import de.hamster.compiler.model.JavaToken;
+import de.hamster.workbench.Workbench;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.util.Iterator;
 import java.util.LinkedList;
-
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
@@ -15,18 +17,13 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.TabSet;
 import javax.swing.text.TabStop;
 
-import de.hamster.compiler.model.HamsterLexer;
-import de.hamster.compiler.model.JavaToken;
-import de.hamster.workbench.Workbench;
-
 /**
  * @author $Author: djasper $
  * @version $Revision: 1.1 $
  */
-public class JavaDocument extends HamsterDocument implements
-		DocumentListener {
+public class JavaDocument extends HamsterDocument implements DocumentListener {
 	int lineHeight;
-	
+
 	public JavaDocument(boolean printing) {
 		scanner = new HamsterLexer();
 		addDocumentListener(this);
@@ -38,24 +35,28 @@ public class JavaDocument extends HamsterDocument implements
 		if (!printing) {
 			StyleConstants.setFontFamily(getStyle("plain"), "Monospaced");
 			StyleConstants.setFontSize(getStyle("plain"), fontSize);
-			
+			StyleConstants.setForeground(getStyle("plain"), Color.WHITE); // jrahn: Standard-Textfarbe auf weiß gesetzt
+
 			/* alt
 			TabStop[] ts = new TabStop[10];
 			for (int i = 0; i < ts.length; i++)
 				ts[i] = new TabStop((i + 1) * 28);
 			StyleConstants.setTabSet(getStyle("plain"), new TabSet(ts));
 			*/
-			
+
 			// dibo 210110 neu
 			TabSet set = calcTabs(4, this.getFont(this.getStyle("plain")));
 			StyleConstants.setTabSet(this.getStyle("plain"), set);
-			
+
 			setParagraphAttributes(0, getLength(), getStyle("plain"), true);
 
 			addStyle("keyword", getStyle("plain"));
 			StyleConstants.setBold(getStyle("keyword"), true);
-			StyleConstants.setForeground(getStyle("keyword"), Color.MAGENTA
-					.darker().darker());
+			StyleConstants.setForeground(getStyle("keyword"),
+					new Color(128, 169, 98)); // jrahn: Keyword-Farbe auf HEX #80A962 umgestellt
+
+			addStyle("method", getStyle("plain")); // jrahn: Methodenstil ergänzt
+			StyleConstants.setBold(getStyle("method"), true); // jrahn: Methoden fett darstellen
 
 			addStyle("comment", getStyle("plain"));
 			StyleConstants.setForeground(getStyle("comment"), new Color(63,
@@ -74,6 +75,11 @@ public class JavaDocument extends HamsterDocument implements
 
 			addStyle("keyword", getStyle("plain"));
 			StyleConstants.setBold(getStyle("keyword"), true);
+			StyleConstants.setForeground(getStyle("keyword"),
+					new Color(128, 169, 98)); // jrahn: Keyword-Farbe auch im Druckmodus angepasst
+
+			addStyle("method", getStyle("plain")); // jrahn: Methodenstil ergänzt
+			StyleConstants.setBold(getStyle("method"), true); // jrahn: Methoden auch im Druckmodus fett
 
 			addStyle("comment", getStyle("plain"));
 			StyleConstants.setForeground(getStyle("comment"), Color.LIGHT_GRAY);
@@ -81,32 +87,32 @@ public class JavaDocument extends HamsterDocument implements
 			addStyle("literal", getStyle("plain"));
 			StyleConstants.setForeground(getStyle("literal"), Color.LIGHT_GRAY);
 		}
-		
+
 		// dibo 210110
 		Font f = this.getFont(this.getStyle("plain"));
 		FontMetrics fm = new JPanel().getFontMetrics(f);
 		lineHeight = fm.getHeight();
-		
+
 		tokens = new LinkedList();
 	}
-	
-	
+
 	// dibo 230309 und 210110
 	public void changeFontSize(int size) {
 		// neu
 		this.removeStyle("plain");
 		this.removeStyle("keyword");
+		this.removeStyle("method"); // jrahn: Methodenstil beim Neuaufbau entfernen
 		this.removeStyle("comment");
 		this.removeStyle("literal");
-		
+
 		initStyles(false, size);
-		
+
 		/* alt
 		StyleConstants.setFontSize(getStyle("plain"), size);
 		TabSet set = calcTabs(4, this.getFont(this.getStyle("plain")));
 		StyleConstants.setTabSet(this.getStyle("plain"), set);
 		*/
-		
+
 		SwingUtilities
 				.invokeLater(new RunRehighlight(0, this.getLength(), this));
 	}
@@ -159,16 +165,19 @@ public class JavaDocument extends HamsterDocument implements
 
 	void setAttributes(JavaToken t) {
 		if (t.getType() == HamsterLexer.COMMENT) {
-			setCharacterAttributes(t.getStart(), t.getText().length()+1,  // dibo 230309
+			setCharacterAttributes(t.getStart(), t.getText().length() + 1, // dibo 230309
 					getStyle("comment"), true);
 		} else if (t.getType() == HamsterLexer.KEYWORD) {
 			setCharacterAttributes(t.getStart(), t.getText().length(),
 					getStyle("keyword"), true);
+		} else if (t.getType() == HamsterLexer.METHOD) { // jrahn: Methodenstil ergänzt
+			setCharacterAttributes(t.getStart(), t.getText().length(),
+					getStyle("method"), true); // jrahn: Methoden fett darstellen
 		} else if (t.getType() == HamsterLexer.LITERAL) {
-			setCharacterAttributes(t.getStart(), t.getText().length()+1, // dibo 230309
+			setCharacterAttributes(t.getStart(), t.getText().length() + 1, // dibo 230309
 					getStyle("literal"), true);
 		} else {
-			setCharacterAttributes(t.getStart(), t.getText().length()+1, // dibo 230309
+			setCharacterAttributes(t.getStart(), t.getText().length() + 1, // dibo 230309
 					getStyle("plain"), true);
 		}
 	}

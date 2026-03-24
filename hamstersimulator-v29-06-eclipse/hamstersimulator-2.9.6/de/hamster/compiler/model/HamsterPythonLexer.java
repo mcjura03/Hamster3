@@ -16,9 +16,9 @@ public class HamsterPythonLexer extends HamsterLexer {
 				"def", "for", "lambda", "try" };
 
 		// Rufe wiederholt die Initialisierungsmethode auf.
-		keywords = new HashMap<>(); // jrahn: Raw HashMap durch generische HashMap ersetzt
+		keywords = new HashMap<>(); // jrahn: generische HashMap verwendet
 		for (String keyword : KEYWORDS) { // jrahn: for-each Schleife statt Indexschleife
-			keywords.put(keyword, keyword); // jrahn: typsichere Befüllung
+			keywords.put(keyword, keyword); // jrahn
 		}
 	}
 
@@ -31,13 +31,17 @@ public class HamsterPythonLexer extends HamsterLexer {
 	public JavaToken nextToken() {
 		if (!ready())
 			return null;
+
 		int oldPos = this.pos;
 		int type = PLAIN;
+		boolean identifier = false; // jrahn: merkt sich, ob ein Bezeichner gelesen wurde
+
 		if (LL(0) == ' ' || LL(0) == '\t' || LL(0) == '\n' || LL(0) == '\r') {
 			consumeWhiteSpace();
 			type = WHITESPACE;
 		} else if (Character.isJavaIdentifierStart(LL(0))) {
 			consumeIdentifier();
+			identifier = true; // jrahn: Identifier erkannt
 		} else if (LL(0) == '#') {
 			consumeSingleLineComment();
 			type = COMMENT;
@@ -55,11 +59,20 @@ public class HamsterPythonLexer extends HamsterLexer {
 		} else {
 			consumeCharacter();
 		}
+
 		String t = text.substring(oldPos, pos);
-		if (type == PLAIN) {
-			if (keywords.get(t) != null)
+
+		if (type == PLAIN && identifier) {
+			if (keywords.get(t) != null) {
 				type = KEYWORD;
+			} else if (hamsterMethods.get(t) != null
+					&& nextNonWhitespaceChar() == '(') { // jrahn: Hamstermethoden mit Abstand vor '(' erkennen
+				type = METHOD;
+			} else if (LL(0) == '(') { // jrahn: sonstige Methoden nur bei direkt angehefteter Klammer
+				type = METHOD;
+			}
 		}
+
 		return new JavaToken(t, off + oldPos, type);
 	}
 

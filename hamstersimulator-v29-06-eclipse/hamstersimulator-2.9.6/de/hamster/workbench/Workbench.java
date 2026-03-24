@@ -636,20 +636,22 @@ public class Workbench {
 	}
 
 	public static void handleLAF() {
-		startLAF = UIManager.getLookAndFeel();
 		try {
-			if (Utils.LAF != null) {
-				JFrame.setDefaultLookAndFeelDecorated(true);
-				UIManager.setLookAndFeel(Utils.LAF);
-			}
+			JFrame.setDefaultLookAndFeelDecorated(true); // jrahn
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); // jrahn
+			startLAF = UIManager.getLookAndFeel(); // jrahn
+	
+			UIManager.put("TabbedPane.background", new java.awt.Color(67,67,67)); // jrahn: Tab-Hintergrund dunkel
+			UIManager.put("TabbedPane.foreground", new java.awt.Color(255,255,255)); // jrahn: Tab-Schrift gruen
+			UIManager.put("TabbedPane.selected", new java.awt.Color(128, 169, 98)); // jrahn: ausgewaehlten Tab dunkel
+			UIManager.put("TabbedPane.focus", new java.awt.Color(128, 169, 98)); // jrahn: Fokusfarbe dunkel
+			UIManager.put("TabbedPane.highlight", new java.awt.Color(15, 15, 15)); // jrahn: Highlight dunkel
+			UIManager.put("TabbedPane.light", new java.awt.Color(15, 15, 15)); // jrahn: helle Kante dunkel
+			UIManager.put("TabbedPane.shadow", new java.awt.Color(30, 30, 30)); // jrahn: Schatten anpassen
+			UIManager.put("TabbedPane.darkShadow", new java.awt.Color(10, 10, 10)); // jrahn: dunklen Schatten anpassen
 		} catch (Exception e) {
 			e.printStackTrace();
-			JFrame.setDefaultLookAndFeelDecorated(false);
-			try {
-				UIManager.setLookAndFeel(startLAF);
-			} catch (UnsupportedLookAndFeelException e1) {
-				e1.printStackTrace();
-			}
+			JFrame.setDefaultLookAndFeelDecorated(false); // jrahn
 		}
 	}
 

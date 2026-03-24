@@ -1,115 +1,123 @@
 package de.hamster.editor.view;
 
+import de.hamster.compiler.model.HamsterLexer;
+import de.hamster.compiler.model.JavaToken;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.util.Iterator;
 import java.util.LinkedList;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.TabSet;
-import javax.swing.text.TabStop;
-
-import de.hamster.compiler.model.HamsterLexer;
-import de.hamster.compiler.model.JavaToken;
+import javax.swing.text.Style; // jrahn: fuer fett gesetzten Methodenstil ergÃ¤nzt
+import javax.swing.text.StyleConstants;
 
 /**
- * Fungiert als einheitliche Schnittstelle (Oberklasse) für alle 
- * Document-Style-Klassen der im Hamstersimulator verwendeter 
- * Programmiersprachen. Im Moment lediglich nur als Platzhalter für 
- * ein Hamster-StyleDocument vorgesehen..
- * 
+ * Fungiert als einheitliche Schnittstelle (Oberklasse) fuer alle
+ * Document-Style-Klassen der im Hamstersimulator verwendeten
+ * Programmiersprachen.
  */
-public class HamsterDocument extends DefaultStyledDocument  implements DocumentListener
-{
+public class HamsterDocument extends DefaultStyledDocument implements DocumentListener {
+
 	boolean highlighting;
-	LinkedList tokens;
+	LinkedList<JavaToken> tokens; // jrahn: LinkedList typisiert
 	HamsterLexer scanner;
-	
-	public HamsterDocument()
-	{
-		tokens = new LinkedList();
-	}
-	
-	JavaToken first() {
-		return (JavaToken) tokens.getFirst();
+
+	public HamsterDocument() {
+		tokens = new LinkedList<>(); // jrahn: generische LinkedList verwendet
+
+		Style methodStyle = this.getStyle("method"); // jrahn: Methodenstil prÃ¼fen
+		if (methodStyle == null) {
+			methodStyle = this.addStyle("method", this.getStyle("plain")); // jrahn: Methodenstil anlegen
+		}
+		StyleConstants.setBold(methodStyle, true); // jrahn: Methoden fett darstellen
 	}
 
-	int copyAllBefore(int pos, LinkedList newTokens) {
+	JavaToken first() {
+		return tokens.getFirst(); // jrahn: Cast durch Generics entfernt
+	}
+
+	int copyAllBefore(int pos, LinkedList<JavaToken> newTokens) { // jrahn: LinkedList typisiert
 		int start = 0;
 		while (!tokens.isEmpty()
 				&& first().getStart() + first().getText().length() < pos) {
 			start = first().getStart() + first().getText().length();
-			//			System.out.println("copy-before: " + first());
 			newTokens.addLast(tokens.removeFirst());
 		}
 		return start;
 	}
-	
-	static TabSet calcTabs(int charactersPerTab, Font font) {
+
+	static javax.swing.text.TabSet calcTabs(int charactersPerTab, Font font) { // jrahn: TabSet voll qualifiziert
 		FontMetrics fm = new JPanel().getFontMetrics(font);
 		int charWidth = fm.charWidth('w');
 		int tabWidth = charWidth * charactersPerTab;
 
-		TabStop[] tabs = new TabStop[100];
-		tabs[0] = new TabStop(tabWidth);
+		javax.swing.text.TabStop[] tabs = new javax.swing.text.TabStop[100]; // jrahn: TabStop voll qualifiziert
+		tabs[0] = new javax.swing.text.TabStop(tabWidth); // jrahn
 
 		for (int j = 1; j < tabs.length; j++) {
-			tabs[j] = new TabStop(tabs[j - 1].getPosition() + tabWidth);
+			tabs[j] = new javax.swing.text.TabStop(
+					tabs[j - 1].getPosition() + tabWidth); // jrahn
 		}
 
-		TabSet tabSet = new TabSet(tabs);
-		return tabSet;
+		return new javax.swing.text.TabSet(tabs); // jrahn
 	}
 
 	public JavaToken getTokenAt(int pos) {
-		int start = 0;
-		for (Iterator iter = tokens.iterator(); iter.hasNext();) {
-			JavaToken token = (JavaToken) iter.next();
-			if (token.getStart() >= pos)
+		for (JavaToken token : tokens) { // jrahn: Iterator durch for-each ersetzt
+			if (token.getStart() >= pos) {
 				return token;
+			}
 		}
 		return null;
 	}
 
 	boolean exists(JavaToken t, int offset) {
 		while (!tokens.isEmpty()) {
-			if (first().getStart() + offset == t.getStart())
+			if (first().getStart() + offset == t.getStart()) {
 				return true;
-			else if (first().getStart() + offset < t.getStart())
+			} else if (first().getStart() + offset < t.getStart()) {
 				tokens.removeFirst();
-			else
+			} else {
 				return false;
+			}
 		}
 		return false;
 	}
 
-	void copyAllAfter(LinkedList newTokens, int offset) {
+	void copyAllAfter(LinkedList<JavaToken> newTokens, int offset) { // jrahn: LinkedList typisiert
 		while (!tokens.isEmpty()) {
 			JavaToken t = first();
 			t.setStart(t.getStart() + offset);
-			//			System.out.println("copy-after: " + t);
 			newTokens.addLast(tokens.removeFirst());
 		}
 	}
 
 	void setAttributes(JavaToken t) {
-		if (t.getType() == HamsterLexer.COMMENT) {
-			setCharacterAttributes(t.getStart(), t.getText().length(),
-					getStyle("comment"), true);
-		} else if (t.getType() == HamsterLexer.KEYWORD) {
-			setCharacterAttributes(t.getStart(), t.getText().length(),
-					getStyle("keyword"), true);
-		} else if (t.getType() == HamsterLexer.LITERAL) {
-			setCharacterAttributes(t.getStart(), t.getText().length(),
-					getStyle("literal"), true);
-		} else {
-			setCharacterAttributes(t.getStart(), t.getText().length(),
-					getStyle("plain"), true);
+		switch (t.getType()) { // jrahn: if-Kette durch switch ersetzt
+			case HamsterLexer.COMMENT:
+				setCharacterAttributes(t.getStart(), t.getText().length(),
+						getStyle("comment"), true);
+				break;
+			case HamsterLexer.KEYWORD:
+				setCharacterAttributes(t.getStart(), t.getText().length(),
+						getStyle("keyword"), true);
+				break;
+			case HamsterLexer.LITERAL:
+				setCharacterAttributes(t.getStart(), t.getText().length(),
+						getStyle("literal"), true);
+				break;
+			case HamsterLexer.METHOD: // jrahn: Methoden-Tokentyp ergÃ¤nzt
+				setCharacterAttributes(t.getStart(), t.getText().length(),
+						getStyle("method"), true); // jrahn: Methodenstil anwenden
+				break;
+			default:
+				setCharacterAttributes(t.getStart(), t.getText().length(),
+						getStyle("plain"), true);
+				break;
 		}
 	}
 
@@ -120,19 +128,20 @@ public class HamsterDocument extends DefaultStyledDocument  implements DocumentL
 	// Prolog: changed method visibility to public.
 	public void rehighlight(int pos, int len) {
 		highlighting = true;
-		long s = System.currentTimeMillis();
-		LinkedList newTokens = new LinkedList();
+		LinkedList<JavaToken> newTokens = new LinkedList<>(); // jrahn: LinkedList typisiert
 		int start = copyAllBefore(pos, newTokens);
 
 		try {
 			scanner.init(0, start, getText(start, getLength() - start));
 		} catch (BadLocationException e1) {
-			// TODO should not happen
+			// should not happen
 		}
+
 		while (scanner.ready()) {
 			JavaToken t = scanner.nextToken();
-			if (t == null)
+			if (t == null) {
 				break;
+			}
 			if (t.getStart() > pos && exists(t, len)) {
 				copyAllAfter(newTokens, len);
 				break;
@@ -145,16 +154,19 @@ public class HamsterDocument extends DefaultStyledDocument  implements DocumentL
 		highlighting = false;
 	}
 
+	@Override
 	public void changedUpdate(DocumentEvent e) {
 	}
 
+	@Override
 	public void insertUpdate(DocumentEvent e) {
-		SwingUtilities.invokeLater(new RunRehighlight(e.getOffset(), e
-				.getLength(), this));
+		SwingUtilities.invokeLater(new RunRehighlight(e.getOffset(),
+				e.getLength(), this));
 	}
 
+	@Override
 	public void removeUpdate(DocumentEvent e) {
-		SwingUtilities.invokeLater(new RunRehighlight(e.getOffset(), -e
-				.getLength(), this));
+		SwingUtilities.invokeLater(new RunRehighlight(e.getOffset(),
+				-e.getLength(), this));
 	}
 }

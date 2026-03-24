@@ -54,7 +54,10 @@ public class TabbedTextArea extends JPanel implements PropertyChangeListener,
     private final boolean locked = false; // dibo 290710
 
     public TabbedTextArea(EditorController controller) {
-        super(new BorderLayout());
+
+
+
+        super(new BorderLayout());	
         this.controller = controller;
         this.textAreas = new HashMap<>(); // jrahn: Diamond-Operator und Generics verwendet
         this.scrollPanes = new HashMap<>(); // jrahn: Diamond-Operator und Generics verwendet
@@ -62,6 +65,8 @@ public class TabbedTextArea extends JPanel implements PropertyChangeListener,
         this.add(BorderLayout.CENTER, this.tabbedPane);
         this.tabbedPane.addChangeListener(controller);
         this.tabbedPane.addChangeListener(this);
+		this.tabbedPane.setUI(new javax.swing.plaf.basic.BasicTabbedPaneUI()); // jrahn: einfache Tab-UI verwenden, damit eigene Farben greifen
+		this.tabbedPane.setOpaque(true); // jrahn: TabbedPane soll Hintergrundfarbe wirklich zeichnen
 
         this.statusBar = new JPanel();
         this.statusBar.setLayout(new GridLayout(1, 0, 3, 3));
@@ -86,6 +91,8 @@ public class TabbedTextArea extends JPanel implements PropertyChangeListener,
         this.colNumber = new JTextField("1");
         this.colNumber.setEditable(false);
         this.statusBar.add(this.colNumber);
+
+		
 
         this.add(BorderLayout.SOUTH, this.statusBar);
     }
@@ -254,6 +261,8 @@ public class TabbedTextArea extends JPanel implements PropertyChangeListener,
             }
             this.tabbedPane.setSelectedComponent(scrollPane);
 
+			
+			h.setBackground(new Color(34, 34, 34)); // jrahn: Editor-Hintergrund auf #0f0f0f gesetzt
             return h;
         }
     }

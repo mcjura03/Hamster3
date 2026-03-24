@@ -74,9 +74,9 @@ public class HamsterLexer {
 			keywords.put(keyword, keyword); // jrahn: typsichere Befüllung
 		}
 
-		hamsterMethods = new HashMap<>(); // jrahn: generische HashMap fuer Hamstermethoden ergänzt
-		for (String hamsterMethod : HAMSTER_METHODS) { // jrahn: Hamstermethoden initialisieren
-			hamsterMethods.put(hamsterMethod, hamsterMethod); // jrahn
+		hamsterMethods = new HashMap<>(); 
+		for (String hamsterMethod : HAMSTER_METHODS) {  	
+			hamsterMethods.put(hamsterMethod, hamsterMethod); 
 		}
 	}
 

@@ -1,5 +1,11 @@
 package de.hamster.editor.view;
 
+import de.hamster.editor.controller.EditorController;
+import de.hamster.model.HamsterFile;
+import de.hamster.workbench.ForwardAction;
+import de.hamster.workbench.Utils;
+import de.hamster.workbench.Workbench;
+import de.hamster.workbench.WorkbenchView;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,7 +13,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JMenu;
@@ -15,13 +20,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.text.DefaultEditorKit;
-
-import de.hamster.editor.controller.EditorController;
-import de.hamster.model.HamsterFile;
-import de.hamster.workbench.ForwardAction;
-import de.hamster.workbench.Utils;
-import de.hamster.workbench.Workbench;
-import de.hamster.workbench.WorkbenchView;
 
 /**
  * 
@@ -32,7 +30,7 @@ public class EditorTools implements PropertyChangeListener {
 
 	private HamsterFile activeFile;
 
-	private SaveAction saveAction = new SaveAction();
+	private final SaveAction saveAction = new SaveAction();
 
 	public class SaveAction extends ForwardAction {
 		public SaveAction() {
@@ -40,7 +38,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private SaveAsAction saveAsAction = new SaveAsAction();
+	private final SaveAsAction saveAsAction = new SaveAsAction();
 
 	public class SaveAsAction extends ForwardAction {
 		public SaveAsAction() {
@@ -48,7 +46,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private SavePlusAction savePlusAction = new SavePlusAction();
+	private final SavePlusAction savePlusAction = new SavePlusAction();
 
 	public class SavePlusAction extends ForwardAction {
 		public SavePlusAction() {
@@ -56,7 +54,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private SaveAsPlusAction saveAsPlusAction = new SaveAsPlusAction();
+	private final SaveAsPlusAction saveAsPlusAction = new SaveAsPlusAction();
 
 	public class SaveAsPlusAction extends ForwardAction {
 		public SaveAsPlusAction() {
@@ -64,7 +62,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private GenerateAction generateAction = new GenerateAction();
+	private final GenerateAction generateAction = new GenerateAction();
 
 	public class GenerateAction extends ForwardAction {
 		public GenerateAction() {
@@ -72,7 +70,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private CloseAction closeAction = new CloseAction();
+	private final CloseAction closeAction = new CloseAction();
 
 	public class CloseAction extends ForwardAction {
 		public CloseAction() {
@@ -80,7 +78,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private PrintAction printAction = new PrintAction();
+	private final PrintAction printAction = new PrintAction();
 
 	public class PrintAction extends ForwardAction {
 		public PrintAction() {
@@ -88,7 +86,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private NewAction newAction = new NewAction();
+	private final NewAction newAction = new NewAction();
 
 	public class NewAction extends ForwardAction {
 		public NewAction() {
@@ -96,7 +94,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private OpenAction openAction = new OpenAction();
+	private final OpenAction openAction = new OpenAction();
 
 	public class OpenAction extends ForwardAction {
 		public OpenAction() {
@@ -104,7 +102,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private CutAction cutAction = new CutAction();
+	private final CutAction cutAction = new CutAction();
 
 	public class CutAction extends DefaultEditorKit.CutAction {
 		public CutAction() {
@@ -112,7 +110,7 @@ public class EditorTools implements PropertyChangeListener {
 		}
 	}
 
-	private CopyAction copyAction = new CopyAction();
+	private final CopyAction copyAction = new CopyAction();
 
 	public class CopyAction extends DefaultEditorKit.CopyAction {
 		public CopyAction() {
