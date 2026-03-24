@@ -327,7 +327,7 @@ public class TabbedTextArea extends JPanel implements PropertyChangeListener,
         int index = this.getIndex(textArea);
         if (evt.getPropertyName() == null ? HamsterFile.MODIFIED == null : evt.getPropertyName().equals(HamsterFile.MODIFIED)) {
             if (((Boolean) evt.getNewValue())) {
-                this.tabbedPane.setIconAt(index, Utils.getIcon("save64.png"));
+                this.tabbedPane.setIconAt(index, Utils.getIcon("save16.png"));
             } else {
                 this.tabbedPane.setIconAt(index, null);
             }
