@@ -1,32 +1,5 @@
-/*python program*/while vornFrei():
+/*python program*/if vornFrei():
     vor()
-   
     
-linksUm()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

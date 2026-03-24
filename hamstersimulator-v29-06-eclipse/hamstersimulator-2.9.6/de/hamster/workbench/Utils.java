@@ -7,11 +7,19 @@ import de.hamster.editor.view.TextAreaPrintable;
 import de.hamster.flowchart.FlowchartPanel;
 import de.hamster.fsm.view.FsmPanel;
 import de.hamster.scratch.ScratchPanel;
+import java.awt.AlphaComposite; // jrahn: fuer Glow- und Hover-Effekt ergänzt
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics2D; // jrahn: fuer Glow- und Hover-Effekt ergänzt
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.RenderingHints; // jrahn: fuer weiche Skalierung ergänzt
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter; // jrahn: fuer Hover-Effekt ergänzt
+import java.awt.event.MouseEvent; // jrahn: fuer Hover-Effekt ergänzt
+import java.awt.image.BufferedImage; // jrahn: fuer skalierte/glowende Icons ergänzt
 import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +32,7 @@ import java.util.ResourceBundle;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.JobName;
+import javax.swing.AbstractButton; // jrahn: gemeinsame Basis fuer JButton und JToggleButton ergänzt
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -32,6 +41,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
+import javax.swing.Timer; // jrahn: fuer gleitende Hover-Animation ergänzt
 
 /**
  * Diese Klasse enthaelt Hilfsmethoden und Konstanten, die im Hamster-Simulator
@@ -49,6 +59,8 @@ public class Utils {
 	public static final int TYPE_HAM = 1;
 
 	public static final int TYPE_TER = 2;
+
+	public static float EDITOR_BUTTON_SCALE = 1.0f; // jrahn: globale Skalierung fuer Toolbar-Buttons ergänzt
 
 	public static final String PSEP = System.getProperty("path.separator");
 
@@ -106,42 +118,39 @@ public class Utils {
 		return MessageFormat.format(getResource(key), new Object[] { param });
 	}
 
-
 	// --- added by C. Noeske: very simple replacement of environment variables used in hamster.properties
 	public static String replaceEnvVariables(String s) {
-	    int i=0;
-	    while ((i=s.indexOf("$(",i)) >= 0) {
-		  int ie = s.indexOf(')',i);
-		  if (ie > 2) {
-		    String envVarName = s.substring(i+2, ie);
-		    String envVar = System.getenv(envVarName);
-		    if (envVar != null) {
-		      s = s.replace("$("+envVarName+")", envVar);
-		    }
-		  }
-	    }
-	    return s;
+		int i = 0;
+		while ((i = s.indexOf("$(", i)) >= 0) {
+			int ie = s.indexOf(')', i);
+			if (ie > 2) {
+				String envVarName = s.substring(i + 2, ie);
+				String envVar = System.getenv(envVarName);
+				if (envVar != null) {
+					s = s.replace("$(" + envVarName + ")", envVar);
+				}
+			}
+		}
+		return s;
 	}
 	// end of addition
-	  
+
 	// --- added by C. Noeske: check, if a directory exists, otherwise create it
 	public static String checkAndCreateDir(String dirName) {
-	    dirName = replaceEnvVariables(dirName);
-	    if ((dirName != null) && (dirName.length() != 0)) {
-	      File dir = new File(dirName);
-	      if ((dir.exists()) || (dir.mkdirs())) {
-	        // success
-	      } 
-	    }
-	    return dirName;
+		dirName = replaceEnvVariables(dirName);
+		if ((dirName != null) && (dirName.length() != 0)) {
+			File dir = new File(dirName);
+			if ((dir.exists()) || (dir.mkdirs())) {
+				// success
+			}
+		}
+		return dirName;
 	}
 	// end of addition
-	
-	
-	
+
 	public static void print(String text) {
 		PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-//		aset.add(OrientationRequested.LANDSCAPE);
+		// aset.add(OrientationRequested.LANDSCAPE);
 		aset.add(new JobName("Hamster-Programm", null));
 
 		/* Create a print job */
@@ -159,7 +168,7 @@ public class Utils {
 
 	public static void print(ScratchPanel panel) {
 		PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-//		aset.add(OrientationRequested.LANDSCAPE);
+		// aset.add(OrientationRequested.LANDSCAPE);
 		aset.add(new JobName("Hamster-Programm", null));
 
 		/* Create a print job */
@@ -175,10 +184,10 @@ public class Utils {
 			Utils.message(null, "msg.printerror");
 		}
 	}
-	
+
 	public static void print(FsmPanel panel) {
 		PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-//		aset.add(OrientationRequested.LANDSCAPE);
+		// aset.add(OrientationRequested.LANDSCAPE);
 		aset.add(new JobName("Hamster-Programm", null));
 
 		/* Create a print job */
@@ -194,10 +203,10 @@ public class Utils {
 			Utils.message(null, "msg.printerror");
 		}
 	}
-	
+
 	public static void print(FlowchartPanel panel) {
 		PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-//		aset.add(OrientationRequested.LANDSCAPE);
+		// aset.add(OrientationRequested.LANDSCAPE);
 		aset.add(new JobName("Hamster-Programm", null));
 
 		/* Create a print job */
@@ -238,7 +247,7 @@ public class Utils {
 		action.putValue(Action.SMALL_ICON,
 				Utils.getIcon(resources.getString(key + ".icon")));
 		action.putValue(Action.MNEMONIC_KEY,
-				new Integer(resources.getString(key + ".mnemonic").charAt(0)));
+				Integer.valueOf(resources.getString(key + ".mnemonic").charAt(0)));
 		try {
 			action.putValue(Action.SHORT_DESCRIPTION,
 					resources.getString(key + ".tooltip"));
@@ -261,8 +270,10 @@ public class Utils {
 
 	/**
 	 * Diese Methode erzeugt einen Button zu einer Action. Dieser hat dann das
-	 * Design, das fuer den Einsatz in einer Toolbar ausgerichtet ist. Im neuen Design ist der Hinter
-	 * des Buttons transparent und es wird nur das Icon angezeigt. Es wird kein Rahmen um den Button gezeichnet.
+	 * Design, das fuer den Einsatz in einer Toolbar ausgerichtet ist. Im neuen
+	 * Design ist der Hintergrund des Buttons transparent und es wird nur das Icon
+	 * angezeigt. Es wird kein Rahmen um den Button gezeichnet. Beim Hover wird das
+	 * Icon gleitend heller, bekommt einen Glow und wird leicht vergroessert.
 	 * 
 	 * @param action
 	 *            Die Action, zu der der Knopf erzeugt wird
@@ -275,11 +286,16 @@ public class Utils {
 		b.setMnemonic(0);
 		b.setMargin(TOOLBAR_MARGIN);
 	
+		applyConfiguredButtonScale(b); // jrahn: Icon anhand editor.button.scale skalieren
+	
 		// Button unsichtbar machen
 		b.setBorderPainted(false);
 		b.setContentAreaFilled(false);
 		b.setFocusPainted(false);
 		b.setOpaque(false);
+		b.setRolloverEnabled(false); // jrahn: eigenes Hover-Verhalten statt Standard-Rollover verwenden
+	
+		installAnimatedHoverEffect(b); // jrahn: gleitenden Hover-Effekt mit Glow und Skalierung ergänzen
 	
 		return b;
 	}
@@ -288,8 +304,9 @@ public class Utils {
 	 * Diese Methode erzeugt einen ToggleButton zu einer Action. Dieser hat dann
 	 * das Design, das fuer den Einsatz in einer Toolbar ausgerichtet ist.
 	 * 
-	 *  Im neuen Design ist der Hinter
-	 * des Buttons transparent und es wird nur das Icon angezeigt. Es wird kein Rahmen um den Button gezeichnet.
+	 * Im neuen Design ist der Hintergrund des Buttons transparent und es wird nur
+	 * das Icon angezeigt. Es wird kein Rahmen um den Button gezeichnet. Beim Hover
+	 * wird das Icon gleitend heller, bekommt einen Glow und wird leicht vergroessert.
 	 * 
 	 * @param action
 	 *            Die Action, zu der der Knopf erzeugt wird
@@ -300,15 +317,54 @@ public class Utils {
 		b.setText(null);
 		b.setMnemonic(0);
 		b.setMargin(TOOLBAR_MARGIN);
-
+	
+		applyConfiguredButtonScale(b); // jrahn: Icon anhand editor.button.scale skalieren
+	
 		// Button unsichtbar machen
 		b.setBorderPainted(false);
 		b.setContentAreaFilled(false);
 		b.setFocusPainted(false);
 		b.setOpaque(false);
-
+		b.setRolloverEnabled(false); // jrahn: eigenes Hover-Verhalten statt Standard-Rollover verwenden
+	
+		installAnimatedHoverEffect(b); // jrahn: gleitenden Hover-Effekt mit Glow und Skalierung ergänzen
+	
 		return b;
 	}
+
+
+	private static void applyConfiguredButtonScale(AbstractButton button) { // jrahn: Icon-Skalierung aus editor.button.scale ergänzt
+		if (!(button.getIcon() instanceof ImageIcon)) {
+			return; // jrahn: nur ImageIcons skalieren
+		}
+	
+		ImageIcon originalIcon = (ImageIcon) button.getIcon(); // jrahn: Original-Icon lesen
+		float scale = EDITOR_BUTTON_SCALE; // jrahn: konfigurierte Skalierung verwenden
+	
+		if (scale <= 0.0f || scale == 1.0f) {
+			return; // jrahn: bei 1.0 oder ungueltigem Wert keine Aenderung
+		}
+	
+		int originalWidth = originalIcon.getIconWidth();
+		int originalHeight = originalIcon.getIconHeight();
+	
+		int newWidth = Math.max(1, Math.round(originalWidth * scale)); // jrahn: Zielbreite berechnen
+		int newHeight = Math.max(1, Math.round(originalHeight * scale)); // jrahn: Zielhoehe berechnen
+	
+		BufferedImage scaledImage = new BufferedImage(newWidth, newHeight,
+				BufferedImage.TYPE_INT_ARGB); // jrahn: skaliertes Zielbild erzeugen
+		Graphics2D g2 = scaledImage.createGraphics();
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BILINEAR); // jrahn: weiche Skalierung aktivieren
+		g2.setRenderingHint(RenderingHints.KEY_RENDERING,
+				RenderingHints.VALUE_RENDER_QUALITY); // jrahn: hohe Renderqualitaet aktivieren
+		g2.drawImage(originalIcon.getImage(), 0, 0, newWidth, newHeight, null); // jrahn: Icon skaliert zeichnen
+		g2.dispose();
+	
+		ImageIcon scaledIcon = new ImageIcon(scaledImage); // jrahn: neues skaliertes Icon erzeugen
+		button.setIcon(scaledIcon); // jrahn: skaliertes Standard-Icon setzen
+	}
+	
 
 	/**
 	 * Diese Methode erzeugt einen Menueeintrag zu einer Action.
@@ -323,6 +379,168 @@ public class Utils {
 		i.setActionCommand(command);
 		i.setAccelerator(KeyStroke.getKeyStroke(shortcut));
 		return i;
+	}
+
+	/**
+	 * Diese Methode installiert einen animierten Hover-Effekt fuer Icon-Buttons.
+	 * Der Effekt kombiniert eine leichte Vergoesserung, sanfte Aufhellung und
+	 * einen dezenten Glow. Beim Verlassen wird auch die Rueckanimation gleitend
+	 * abgespielt.
+	 * 
+	 * @param button
+	 *            Der Button, auf dem der Hover-Effekt installiert werden soll
+	 */
+	private static void installAnimatedHoverEffect(final AbstractButton button) { // jrahn: Hilfsmethode fuer animierte Hover-Effekte ergänzt
+		if (!(button.getIcon() instanceof ImageIcon)) {
+			return; // jrahn: Effekt nur anwenden, wenn ein ImageIcon vorhanden ist
+		}
+
+		final ImageIcon originalIcon = (ImageIcon) button.getIcon(); // jrahn: Original-Icon sichern
+		final float[] progress = new float[] { 0.0f }; // jrahn: Animationsfortschritt von 0 bis 1
+		final float[] target = new float[] { 0.0f }; // jrahn: Zielwert fuer Hover-Animation
+		final Timer timer = new Timer(15, null); // jrahn: Timer fuer gleitende Animation
+		final int baseWidth = originalIcon.getIconWidth(); // jrahn: Basisbreite speichern
+		final int baseHeight = originalIcon.getIconHeight(); // jrahn: Basishoehe speichern
+
+		button.setIcon(createHoverIcon(originalIcon, 0.0f)); // jrahn: gepolstertes Basis-Icon setzen
+		button.setPressedIcon(createHoverIcon(originalIcon, 1.0f)); // jrahn: gedrueckten Zustand heller darstellen
+		button.setSelectedIcon(createHoverIcon(originalIcon, 1.0f)); // jrahn: selektierten Zustand heller darstellen
+		button.setDisabledIcon(originalIcon); // jrahn: deaktiviertes Icon unveraendert lassen
+
+		timer.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				float delta = target[0] - progress[0]; // jrahn: Abstand zum Zielwert berechnen
+				if (Math.abs(delta) < 0.04f) {
+					progress[0] = target[0]; // jrahn: am Ende exakt auf den Zielwert setzen
+					timer.stop();
+				} else {
+					progress[0] += delta * 0.35f; // jrahn: weiche Annäherung fuer gleitenden Uebergang
+				}
+
+				button.setIcon(createHoverIcon(originalIcon, progress[0])); // jrahn: animiertes Icon laufend aktualisieren
+				if (button instanceof JToggleButton && ((JToggleButton) button).isSelected()) {
+					button.setSelectedIcon(createHoverIcon(originalIcon, Math.max(progress[0], 1.0f))); // jrahn: selektierten Zustand stabil halten
+				}
+				button.repaint(); // jrahn: Button neu zeichnen
+			}
+		});
+
+		button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				target[0] = 1.0f; // jrahn: bei Hover zum hellen/groesseren Zustand animieren
+				if (!timer.isRunning()) {
+					timer.start();
+				}
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				target[0] = 0.0f; // jrahn: Rueckanimation beim Verlassen aktivieren
+				if (!timer.isRunning()) {
+					timer.start();
+				}
+			}
+		});
+
+		button.setSize(button.getPreferredSize().width, button.getPreferredSize().height); // jrahn: bevorzugte Groesse initialisieren
+		button.setMaximumSize(button.getPreferredSize()); // jrahn: ausreichend Platz fuer Glow und Skalierung sichern
+		button.setMinimumSize(button.getPreferredSize()); // jrahn: ausreichend Platz fuer Glow und Skalierung sichern
+
+		// jrahn: bevorzugte Groesse explizit mit Glow-Puffer bestimmen
+		int paddedWidth = baseWidth + 8;
+		int paddedHeight = baseHeight + 8;
+		button.setPreferredSize(new java.awt.Dimension(paddedWidth, paddedHeight));
+	}
+
+	/**
+	 * Diese Methode erzeugt aus einem Icon eine animierbare Darstellung mit Glow,
+	 * Aufhellung und leichter Skalierung.
+	 * 
+	 * @param icon
+	 *            Das Original-Icon
+	 * @param progress
+	 *            Animationsfortschritt von 0.0 bis 1.0
+	 * @return Das zusammengesetzte Hover-Icon
+	 */
+	private static ImageIcon createHoverIcon(ImageIcon icon, float progress) { // jrahn: Hilfsmethode fuer Glow- und Skalierungsicon ergänzt
+		int width = icon.getIconWidth();
+		int height = icon.getIconHeight();
+		int padding = 4; // jrahn: Puffer gegen Abschneiden des Glow-Effekts
+
+		int canvasWidth = width + padding * 2;
+		int canvasHeight = height + padding * 2;
+
+		BufferedImage image = new BufferedImage(canvasWidth, canvasHeight,
+				BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2 = image.createGraphics();
+
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BILINEAR); // jrahn: weiche Skalierung aktivieren
+		g2.setRenderingHint(RenderingHints.KEY_RENDERING,
+				RenderingHints.VALUE_RENDER_QUALITY); // jrahn: hohe Renderqualitaet aktivieren
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON); // jrahn: weiche Kanten aktivieren
+
+		float scale = 1.0f + (0.05f * progress); // jrahn: auf Hover bis zu 5 Prozent vergroessern
+		int scaledWidth = Math.max(1, Math.round(width * scale));
+		int scaledHeight = Math.max(1, Math.round(height * scale));
+		int x = (canvasWidth - scaledWidth) / 2;
+		int y = (canvasHeight - scaledHeight) / 2;
+
+		BufferedImage scaledBase = new BufferedImage(scaledWidth, scaledHeight,
+				BufferedImage.TYPE_INT_ARGB); // jrahn: skaliertes Basisbild vorbereiten
+		Graphics2D scaledGraphics = scaledBase.createGraphics();
+		scaledGraphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BILINEAR); // jrahn
+		scaledGraphics.setRenderingHint(RenderingHints.KEY_RENDERING,
+				RenderingHints.VALUE_RENDER_QUALITY); // jrahn
+		scaledGraphics.drawImage(icon.getImage(), 0, 0, scaledWidth, scaledHeight, null); // jrahn: Original-Icon skaliert zeichnen
+		scaledGraphics.dispose();
+
+		// jrahn: Glow mit mehreren weich transparenten Ebenen zeichnen
+		float glowAlpha = 0.08f + (0.22f * progress);
+		g2.setComposite(AlphaComposite.SrcOver.derive(glowAlpha));
+		g2.drawImage(tintImage(scaledBase, new Color(255, 255, 255, 220)), x - 2, y, null);
+		g2.drawImage(tintImage(scaledBase, new Color(255, 255, 255, 220)), x + 2, y, null);
+		g2.drawImage(tintImage(scaledBase, new Color(255, 255, 255, 220)), x, y - 2, null);
+		g2.drawImage(tintImage(scaledBase, new Color(255, 255, 255, 220)), x, y + 2, null);
+		g2.drawImage(tintImage(scaledBase, new Color(255, 255, 255, 160)), x - 1, y - 1, null);
+		g2.drawImage(tintImage(scaledBase, new Color(255, 255, 255, 160)), x + 1, y + 1, null);
+
+		// jrahn: Icon selbst leicht aufhellen
+		g2.setComposite(AlphaComposite.SrcOver);
+		g2.drawImage(scaledBase, x, y, null);
+		if (progress > 0.0f) {
+			g2.setComposite(AlphaComposite.SrcAtop.derive(0.10f + (0.20f * progress))); // jrahn: Aufhellung im Hoverzustand
+			g2.setColor(Color.WHITE);
+			g2.fillRect(0, 0, canvasWidth, canvasHeight);
+		}
+
+		g2.dispose();
+		return new ImageIcon(image);
+	}
+
+	/**
+	 * Diese Methode faerbt ein Bild fuer den Glow-Effekt ein.
+	 * 
+	 * @param source
+	 *            Das Quellbild
+	 * @param tint
+	 *            Die Glow-Farbe
+	 * @return Das getoente Bild
+	 */
+	private static BufferedImage tintImage(BufferedImage source, Color tint) { // jrahn: Hilfsmethode zum Einfaerben des Glow-Effekts ergänzt
+		BufferedImage tinted = new BufferedImage(source.getWidth(),
+				source.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2 = tinted.createGraphics();
+		g2.drawImage(source, 0, 0, null);
+		g2.setComposite(AlphaComposite.SrcAtop);
+		g2.setColor(tint);
+		g2.fillRect(0, 0, source.getWidth(), source.getHeight());
+		g2.dispose();
+		return tinted;
 	}
 
 	/**
@@ -413,7 +631,7 @@ public class Utils {
 
 	// Python
 	public static boolean PYTHON = false;
-	
+
 	// JavaScript
 	public static boolean JAVASCRIPT = false;
 
@@ -425,7 +643,7 @@ public class Utils {
 
 	// Endliche Automaten
 	public static boolean FSM = false;
-	
+
 	// Flowcharts
 	public static boolean FLOWCHART = false;
 
@@ -497,6 +715,15 @@ public class Utils {
 					Utils.LOGFOLDER = checkAndCreateDir(str) + FSEP;
 				}
 
+				str = p.getProperty("button_scale"); // jrahn: Button-Skalierung aus Properties lesen
+				if (str != null) {
+					try {
+						Utils.EDITOR_BUTTON_SCALE = Float.parseFloat(str.trim()); // jrahn: Property in Float umwandeln
+					} catch (NumberFormatException e) {
+						Utils.EDITOR_BUTTON_SCALE = 1.0f; // jrahn: bei ungueltigem Wert auf Standard zurueckfallen
+					}
+				}
+
 				// Scheme Martin
 				str = p.getProperty("scheme");
 				if (str != null)
@@ -514,7 +741,7 @@ public class Utils {
 					} else {
 						Utils.PYTHON = false;
 					}
-				
+
 				// JavaScript
 				str = p.getProperty("javascript");
 				if (str != null)
@@ -541,7 +768,7 @@ public class Utils {
 					} else {
 						Utils.SCRATCH = false;
 					}
-				
+
 				// FSM
 				str = p.getProperty("fsm");
 				if (str != null)
@@ -550,7 +777,7 @@ public class Utils {
 					} else {
 						Utils.FSM = false;
 					}
-				
+
 				// Flowchart
 				str = p.getProperty("flowchart");
 				if (str != null)
@@ -574,11 +801,11 @@ public class Utils {
 					Utils.PLCON = new String(str);
 
 				PROLOG_MSG = "Die Prolog-Interpreter-Anwendungsdatei konnte nicht lokalisiert werden.\n\n"
-						+ "Um Prolog nutzen zu k�nnen, installieren Sie bitte SWIProlog\n"
+						+ "Um Prolog nutzen zu k\u00f6nnen, installieren Sie bitte SWIProlog\n"
 						+ "und/oder erweitern Sie die PATH-Variable des\n"
 						+ "Systems um das Verzeichnis, in dem sich die Datei 'swipl.exe' befindet.\n"
 						+ "Geben Sie alternativ in der Datei 'hamster.properties' in der Property 'plcon'\n "
-						+ "den vollst�ndigen Pfad des SWIProlog-Interpreters an (-> LINUX-Nutzer!).\n\n"
+						+ "den vollst\u00e4ndigen Pfad des SWIProlog-Interpreters an (-> LINUX-Nutzer!).\n\n"
 						+ "Wenn Sie Prolog nicht nutzen wollen, setzen Sie in der Datei 'hamster.properties'\n"
 						+ "das Property 'prolog' auf 'false'.";
 

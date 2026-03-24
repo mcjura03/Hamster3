@@ -642,11 +642,11 @@ public class Workbench {
 			startLAF = UIManager.getLookAndFeel(); // jrahn
 	
 			UIManager.put("TabbedPane.background", new java.awt.Color(67,67,67)); // jrahn: Tab-Hintergrund dunkel
-			UIManager.put("TabbedPane.foreground", new java.awt.Color(255,255,255)); // jrahn: Tab-Schrift gruen
-			UIManager.put("TabbedPane.selected", new java.awt.Color(128, 169, 98)); // jrahn: ausgewaehlten Tab dunkel
-			UIManager.put("TabbedPane.focus", new java.awt.Color(128, 169, 98)); // jrahn: Fokusfarbe dunkel
-			UIManager.put("TabbedPane.highlight", new java.awt.Color(15, 15, 15)); // jrahn: Highlight dunkel
-			UIManager.put("TabbedPane.light", new java.awt.Color(15, 15, 15)); // jrahn: helle Kante dunkel
+			UIManager.put("TabbedPane.foreground", new java.awt.Color(255,255,255)); // jrahn: Tab-Schrift weiß
+			UIManager.put("TabbedPane.selected", new java.awt.Color(128, 169, 98)); // jrahn: ausgewaehlten Tab grün
+			UIManager.put("TabbedPane.focus", new java.awt.Color(128, 169, 98)); // jrahn: Fokusfarbe grün
+			UIManager.put("TabbedPane.highlight", new java.awt.Color(67, 67, 67)); // jrahn: Highlight dunkel
+			UIManager.put("TabbedPane.light", new java.awt.Color(67, 67, 67)); // jrahn: helle Kante dunkel
 			UIManager.put("TabbedPane.shadow", new java.awt.Color(30, 30, 30)); // jrahn: Schatten anpassen
 			UIManager.put("TabbedPane.darkShadow", new java.awt.Color(10, 10, 10)); // jrahn: dunklen Schatten anpassen
 		} catch (Exception e) {

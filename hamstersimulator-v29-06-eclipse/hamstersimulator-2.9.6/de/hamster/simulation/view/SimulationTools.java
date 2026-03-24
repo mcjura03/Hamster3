@@ -1,5 +1,9 @@
 package de.hamster.simulation.view;
 
+import de.hamster.simulation.controller.SimulationController;
+import de.hamster.simulation.model.SimulationModel;
+import de.hamster.workbench.ForwardAction;
+import de.hamster.workbench.Utils;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -7,17 +11,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-
 import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-
-import de.hamster.simulation.controller.SimulationController;
-import de.hamster.simulation.model.SimulationModel;
-import de.hamster.workbench.ForwardAction;
-import de.hamster.workbench.Utils;
 
 public class SimulationTools implements MouseListener, MouseMotionListener {
 	public static final int WALL = 0;
@@ -256,7 +254,7 @@ public class SimulationTools implements MouseListener, MouseMotionListener {
 	public class WallTool extends TerrainTool {
 		public WallTool() {
 			super(true);
-			setImage(Utils.getImage("Wall32.png"));
+			setImage(Utils.getImage("Wall128.png"));
 		}
 		public void done() {
 			simulationController.setWall(Math.min(startCol, endCol), Math.min(
@@ -267,7 +265,7 @@ public class SimulationTools implements MouseListener, MouseMotionListener {
 	public class DeleteTool extends TerrainTool {
 		public DeleteTool() {
 			super(true);
-			setImage(Utils.getImage("Delete32.gif"));
+			setImage(Utils.getImage("delete128.png"));
 		}
 		public void done() {
 			simulationController.setEmpty(Math.min(startCol, endCol), Math.min(
@@ -394,8 +392,8 @@ public class SimulationTools implements MouseListener, MouseMotionListener {
 	
 	// Prolog
 	/**
-	 * Aktiviert / Deaktiviert die Möglichkeit zum Editieren im Territorium des 
-	 * Simulationssfensters. Das Editieren soll während der Ausführung eines 
+	 * Aktiviert / Deaktiviert die Mï¿½glichkeit zum Editieren im Territorium des 
+	 * Simulationssfensters. Das Editieren soll wï¿½hrend der Ausfï¿½hrung eines 
 	 * Prolog-Programms unterbunden werden.
 	 */
 	public void setSimulationPanelListenerEnabled(boolean value)
