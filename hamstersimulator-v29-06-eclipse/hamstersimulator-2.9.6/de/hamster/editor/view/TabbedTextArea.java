@@ -343,13 +343,13 @@ public class TabbedTextArea extends JPanel implements PropertyChangeListener,
         } else if (evt.getPropertyName() == null ? HamsterFile.LOCKED == null : evt.getPropertyName().equals(HamsterFile.LOCKED)) {
             if (((Boolean) evt.getNewValue())) {
                 textArea.setEditable(false);
-                textArea.setBackground(new Color(230, 230, 230)); // getBackground());
+                textArea.setBackground(new Color(20, 20, 20)); // getBackground());
                 this.lock(true);
             } else {
                 this.tabbedPane.setIconAt(index, null);
                 textArea.setEditable(true);
                 textArea.removeLineHighlight();
-                textArea.setBackground(Color.WHITE);
+                textArea.setBackground(new Color(20,20,20));
                 this.lock(false);
             }
         }
@@ -374,11 +374,11 @@ public class TabbedTextArea extends JPanel implements PropertyChangeListener,
         } else {
             if (locked) {
                 textArea.setEditable(false);
-                textArea.setBackground(new Color(230, 230, 230)); // getBackground());
+                textArea.setBackground(new Color(20, 20, 20)); // getBackground());
             } else {
                 textArea.setEditable(true);
                 textArea.removeLineHighlight();
-                textArea.setBackground(Color.WHITE);
+                textArea.setBackground(new Color(20, 20, 20));
             }
         }
         this.lock(locked);

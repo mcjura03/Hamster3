@@ -79,10 +79,10 @@ public class EditorController implements TreeSelectionListener, ActionListener,
 
 		this.editorTools = new EditorTools(this);
 		this.tabbedTextArea = new TabbedTextArea(this);
-		this.tabbedTextArea.setBackground(new Color(255, 255, 220)); // dibo
+		this.tabbedTextArea.setBackground(new Color(25, 25, 22)); // dibo
 																		// 230309
 		this.fileTree = new FileTree(this);
-		this.fileTree.setBackground(new Color(240, 252, 202)); // dibo 230309
+		this.fileTree.setBackground(new Color(67, 67, 67)); // dibo 230309
 
 		this.newHamsterDialog = new NewHamsterDialog(this.tabbedTextArea);
 		this.fileChooser = Utils.getFileChooser();

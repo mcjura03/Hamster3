@@ -11,7 +11,7 @@ public class LineNumberPanel extends JTextPane {
 	public LineNumberPanel() {
 		this.doc = new LineNumberDocument();
 		this.setDocument(this.doc);
-		this.setBackground(Color.LIGHT_GRAY);
+		this.setBackground(new Color(20,20, 20));
 		this.setEditable(false); // dibo 210110
 	}
 

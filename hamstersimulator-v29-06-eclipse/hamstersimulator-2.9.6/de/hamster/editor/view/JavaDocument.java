@@ -59,8 +59,8 @@ public class JavaDocument extends HamsterDocument implements DocumentListener {
 			StyleConstants.setBold(getStyle("method"), true); // jrahn: Methoden fett darstellen
 
 			addStyle("comment", getStyle("plain"));
-			StyleConstants.setForeground(getStyle("comment"), new Color(63,
-					127, 95));
+			StyleConstants.setForeground(getStyle("comment"), new Color(200,
+					200, 200));
 
 			addStyle("literal", getStyle("plain"));
 			StyleConstants.setForeground(getStyle("literal"), Color.BLUE);
@@ -82,10 +82,12 @@ public class JavaDocument extends HamsterDocument implements DocumentListener {
 			StyleConstants.setBold(getStyle("method"), true); // jrahn: Methoden auch im Druckmodus fett
 
 			addStyle("comment", getStyle("plain"));
-			StyleConstants.setForeground(getStyle("comment"), Color.LIGHT_GRAY);
+			StyleConstants.setForeground(getStyle("comment"), new Color(20,
+					20, 20));
 
 			addStyle("literal", getStyle("plain"));
-			StyleConstants.setForeground(getStyle("literal"), Color.LIGHT_GRAY);
+			StyleConstants.setForeground(getStyle("literal"), new Color(20,
+					20, 20));
 		}
 
 		// dibo 210110
