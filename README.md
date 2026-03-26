@@ -10,4 +10,6 @@ https://www.java-hamster-modell.de/index.html
 Änderungen zum Original bestehen in:
 
 - Entfernen von veralteten Datentypen (Observable, )
+- Umstellung auf das Geräte-Look&Feel
+- Dark Theme
 - Update der verwendeten Grafiken
