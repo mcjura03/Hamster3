@@ -1,4 +1,4 @@
-# Hamster-Simulator Java 25
+# Hamster-Simulator 3.X
 ---------------------------------
 
 (1)
