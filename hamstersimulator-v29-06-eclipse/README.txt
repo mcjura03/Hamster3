@@ -1,3 +1,6 @@
+## Aus dem Original übernommene README:
+HINWEIS: Das Projekt wurde mit passenden Konfigurationen nach VSCode überführt!
+
 Hamster-Simulator Eclipse-Projekt
 ---------------------------------
 
@@ -12,7 +15,7 @@ Eclipse runterladen und installieren
 Sourcecode (als Eclipse-Projekt) runterladen (https://www.java-hamster-modell.de/simulator.html#eclipse) und die zip-Datei entpacken! In dem Ordner "hamstersimulator-v29-06-eclipse" befindet sich im Unterordner "hamstersimulator-2.9.6" das Eclipse-Projekt
 
 (4)
-Eclipse starten; als Workspace m�glichst ein leeres neues Verzeichnis erstellen und ausw�hlen, bspw. "hamstersimulator"
+Eclipse starten; als Workspace möglichst ein leeres neues Verzeichnis erstellen und auswählen, bspw. "hamstersimulator"
 
 (5)
 Video anschauen unter: (https://www.java-hamster-modell.de/simulator.html#eclipse
