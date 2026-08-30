@@ -7,14 +7,14 @@
             "name": "Workbench",
             "request": "launch",
             "mainClass": "de.hamster.workbench.Workbench",
-            "projectName": "hamstersimulator-3.1.0_saldria_edition_9c026401"
+            "projectName": "hamstersimulator-3.1.0_regular_edition_9c026401"
         },
         {
             "type": "java",
             "name": "HSTest",
             "request": "launch",
             "mainClass": "de.hamster.HSTest",
-            "projectName": "hamstersimulator-3.1.0_SaldriaEdition",
+            "projectName": "hamstersimulator-3.1.0_RegularEdition",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole"
         },
@@ -23,7 +23,7 @@
             "name": "Workbench",
             "request": "launch",
             "mainClass": "de.hamster.workbench.Workbench",
-            "projectName": "hamstersimulator-3.1.0_SaldriaEdition",
+            "projectName": "hamstersimulator-3.1.0_RegularEdition",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole"
         },
@@ -32,7 +32,7 @@
             "name": "Launch Java Program",
             "request": "launch",
             "mainClass": "",
-            "projectName": "hamstersimulator-3.1.0_SaldriaEdition",
+            "projectName": "hamstersimulator-3.1.0_RegularEdition",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole"
         },
@@ -41,7 +41,7 @@
             "name": "Hamstersimulator (run.java)",
             "request": "launch",
             "mainClass": "de.hamster.run",
-            "projectName": "hamstersimulator-3.1.0_SaldriaEdition",
+            "projectName": "hamstersimulator-3.1.0_RegularEdition",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole"
         }
