@@ -7,16 +7,15 @@ import de.hamster.lego.model.LegoModel;
 import de.hamster.simulation.view.DialogTerminal;
 import de.hamster.simulation.view.multimedia.opengl.J3DFrame;
 import de.hamster.simulation.view.multimedia.opengl.OpenGLController;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Insets;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
@@ -25,31 +24,26 @@ import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-
 import java.lang.reflect.Method;
-
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -60,7 +54,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
 import javax.swing.text.JTextComponent;
 
 
@@ -130,6 +123,14 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
 
         configureCaretDefaults();
     }
+
+	private void setWindowIcon(Frame frame) {
+		URL iconUrl = WorkbenchView.class.getResource("/resources/icon.png");
+	
+		if (iconUrl != null) {
+			frame.setIconImage(new ImageIcon(iconUrl).getImage());
+		}
+	}
 
 
     /**
@@ -385,6 +386,7 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
     public void createSimulationFrame() {
 
         simulation = new JFrame("Simulation");
+		setWindowIcon(simulation);
         simulation.setSize(700, 500);
         simulation.setDefaultCloseOperation(0);
 
@@ -499,7 +501,7 @@ public class WorkbenchView implements PropertyChangeListener, WindowFocusListene
     public void createEditorFrame() {
 
         editor = new JFrame("Editor");
-
+		setWindowIcon(editor);
         editor.setSize(800, 600);
         editor.setDefaultCloseOperation(0);
 
