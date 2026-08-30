@@ -1,5 +1,13 @@
 package de.hamster.model;
 
+import de.hamster.flowchart.controller.FlowchartHamsterFile;
+import de.hamster.flowchart.controller.FlowchartProgram;
+import de.hamster.fsm.controller.FsmHamsterFile;
+import de.hamster.fsm.controller.FsmProgram;
+import de.hamster.scratch.ScratchHamsterFile;
+import de.hamster.scratch.ScratchProgram;
+import de.hamster.workbench.HamsterFileFilter;
+import de.hamster.workbench.Utils;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -9,17 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
-
 import javax.swing.JOptionPane;
-
-import de.hamster.flowchart.controller.FlowchartHamsterFile;
-import de.hamster.flowchart.controller.FlowchartProgram;
-import de.hamster.fsm.controller.FsmHamsterFile;
-import de.hamster.fsm.controller.FsmProgram;
-import de.hamster.scratch.ScratchHamsterFile;
-import de.hamster.scratch.ScratchProgram;
-import de.hamster.workbench.HamsterFileFilter;
-import de.hamster.workbench.Utils;
 
 /**
  * Diese Klasse stellt eine einzelnen Datei im Dateisystem dar. Diese Datei kann
@@ -448,8 +446,13 @@ public class HamsterFile implements Comparable {
 				return "(define (start Territorium)\n()\n)";
 			} else if (type == PROLOGPROGRAM) { // Prolog
 				return "main :-\n    vornFrei,\n    vor.\n";
-			} else if (type == PYTHONPROGRAM) { // Python
-				return "if vornFrei():\n    vor()\n";
+			} else if (type == PYTHONPROGRAM) { // Python 
+				if (Utils.getResource("python.alias.usage").equals("true")){
+					return "#Achtung: In dieser Datei musst du die im Unterricht besprochenen Befehle verwenden.\n#Die Befehle aus dem Internet funktionieren nicht!\n\nif istDaPlatz():\n    schritt()\n";
+				}
+				else{return "if vornFrei():\n    vor()\n";}
+				
+				
 			} else if (type == JAVASCRIPTPROGRAM) { // JavaScript
 				return "if (vornFrei())\n    vor();\n";
 			} else if (type == RUBYPROGRAM) { // Ruby

@@ -76,8 +76,12 @@ public class NewHamsterDialog extends JDialog {
 		
 		// Python
 		if (Utils.PYTHON) {
-			programTypesList.add(new ProgramType(Utils
+			if (Utils.getResource("python.alias.usage").equals("true")){
+				programTypesList.add(new ProgramType("Python [Saldria Edition]", HamsterFile.PYTHONPROGRAM));
+			}
+			else{			programTypesList.add(new ProgramType(Utils
 					.getResource("editor.pythonp"), HamsterFile.PYTHONPROGRAM));
+			}
 		}
 
 		// JavaScript
@@ -105,7 +109,7 @@ public class NewHamsterDialog extends JDialog {
 		}
 		// Prolog
 		if (Utils.PROLOG) {
-			// Prüfe nochmals nach, ob der Prolog-Interpreter
+			// Prï¿½fe nochmals nach, ob der Prolog-Interpreter
 			// auch wirklich auffindbar ist..
 			try {
 				Runtime runtime = Runtime.getRuntime();

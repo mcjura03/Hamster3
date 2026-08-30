@@ -1,7 +1,11 @@
 package de.hamster.simulation.view;
 
+import de.hamster.model.HamsterInstruction;
+import de.hamster.simulation.model.LogEntry;
+import de.hamster.simulation.model.LogSink;
+import de.hamster.simulation.model.SimulationModel;
+import de.hamster.workbench.Utils;
 import java.awt.BorderLayout;
-
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -9,17 +13,12 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import de.hamster.model.HamsterInstruction;
-import de.hamster.simulation.model.LogEntry;
-import de.hamster.simulation.model.LogSink;
-import de.hamster.simulation.model.SimulationModel;
-import de.hamster.workbench.Utils;
-
 /**
  * @author $Author: djasper $
  * @version $Revision: 1.1 $
  */
 public class LogPanel extends JPanel implements LogSink {
+
 	JTextPane textPane;
 
 	private StyledDocument document;
@@ -36,133 +35,398 @@ public class LogPanel extends JPanel implements LogSink {
 			StyleConstants.setBold(document.getStyle("hamster" + i), true);
 		}
 
-		StyleConstants.setForeground(document.getStyle("hamster-1"),
-				Utils.COLORS[0]);
+		StyleConstants.setForeground(
+				document.getStyle("hamster-1"),
+				Utils.COLORS[0]
+		);
+
 		for (int i = 0; i < Utils.COLORS.length - 1; i++) {
-			StyleConstants.setForeground(document.getStyle("hamster" + i),
-					Utils.COLORS[i + 1].darker());
+			StyleConstants.setForeground(
+					document.getStyle("hamster" + i),
+					Utils.COLORS[i + 1].darker()
+			);
 		}
+
 		JPanel buffer = new JPanel(new BorderLayout());
 		buffer.add(BorderLayout.CENTER, textPane);
+
 		add(BorderLayout.CENTER, new JScrollPane(buffer));
 	}
 
+
+	/**
+	 * Ersetzt die internen Hamster-Befehlsnamen durch die in
+	 * hamster.properties definierten Aliase.
+	 *
+	 * Die Aliase werden nur verwendet, wenn
+	 *
+	 * python.alias.usage=true
+	 *
+	 * gesetzt ist.
+	 */
+	private String applyCommandAliases(String text) {
+
+		if (text == null) {
+			return null;
+		}
+
+		if (!"true".equalsIgnoreCase(Utils.getResource("python.alias.usage"))) {
+			return text;
+		}
+
+		text = replaceCommand(
+				text,
+				"vor",
+				Utils.getResource("python.alias.vor")
+		);
+
+		text = replaceCommand(
+				text,
+				"linksUm",
+				Utils.getResource("python.alias.linksUm")
+		);
+
+		text = replaceCommand(
+				text,
+				"gib",
+				Utils.getResource("python.alias.gib")
+		);
+
+		text = replaceCommand(
+				text,
+				"nimm",
+				Utils.getResource("python.alias.nimm")
+		);
+
+		text = replaceCommand(
+				text,
+				"vornFrei",
+				Utils.getResource("python.alias.vornFrei")
+		);
+
+		text = replaceCommand(
+				text,
+				"kornDa",
+				Utils.getResource("python.alias.kornDa")
+		);
+
+		text = replaceCommand(
+				text,
+				"maulLeer",
+				Utils.getResource("python.alias.maulLeer")
+		);
+
+		return text;
+	}
+
+
+	/**
+	 * Ersetzt einen Befehlsnamen nur dann, wenn es sich tatsächlich
+	 * um den Befehl handelt.
+	 *
+	 * Unterstützt beispielsweise:
+	 *
+	 * vor
+	 * vor()
+	 * vor(...)
+	 *
+	 * Verhindert gleichzeitig, dass zufällige Vorkommen innerhalb
+	 * anderer Texte ersetzt werden.
+	 */
+	private String replaceCommand(
+			String text,
+			String original,
+			String alias) {
+
+		if (alias == null || alias.isBlank()) {
+			return text;
+		}
+
+		if (text.equals(original)) {
+			return alias;
+		}
+
+		if (text.startsWith(original + "(")) {
+			return alias + text.substring(original.length());
+		}
+
+		return text;
+	}
+
+
+	@Override
 	public void logEntry(LogEntry logEntry) {
+
 		String text = logEntry.getInstruction().toString();
-		if (text == null || text.equals("") || logEntry.getResult() == null)
+
+		if (text == null || text.equals("") || logEntry.getResult() == null) {
 			return;
+		}
+
 		if (text.contains("$_dibo_intern$")) {
 			return;
 		}
+
 		if (text.contains("$_dibo_p_intern$")) {
 			return;
 		}
+
+
+		/*
+		 * Aliase für die Anzeige anwenden.
+		 *
+		 * Die eigentliche HamsterInstruction wird NICHT verändert.
+		 */
+		text = applyCommandAliases(text);
+
+
 		if (!logEntry.getResult().equals("ok")) {
 			text += " : " + logEntry.getResult();
 		} else {
-			text += ";"; // dibo 31.01.2007
+			text += ";";
 		}
-		StyledDocument d = (StyledDocument) textPane.getDocument();
+
+		StyledDocument d =
+				(StyledDocument) textPane.getDocument();
 
 		int color = -2;
-		SimulationModel model = de.hamster.workbench.Workbench.getWorkbench()
-				.getSimulationController().getSimulationModel();
+
+		SimulationModel model =
+				de.hamster.workbench.Workbench
+						.getWorkbench()
+						.getSimulationController()
+						.getSimulationModel();
+
 		int hid = -3;
+
 		try {
+
 			int i = -2;
+
 			if (logEntry.getInstruction() instanceof HamsterInstruction) {
-				HamsterInstruction hi = (HamsterInstruction) logEntry
-						.getInstruction();
-				i = Math.min(hi.getHamster(), Utils.COLORS.length - 2);
+
+				HamsterInstruction hi =
+						(HamsterInstruction) logEntry.getInstruction();
+
+				i = Math.min(
+						hi.getHamster(),
+						Utils.COLORS.length - 2
+				);
 
 				hid = hi.getHamster();
-				if (model.getHamster(hid) == null)
+
+				if (model.getHamster(hid) == null) {
 					return;
-				color = model.getHamster(hid).getColor();
-				if (hid == -1) {
-					color = model.getHamster(hid).getColor() - 1;
-				} else if (color <= -1) {
-					color = i;
-				} else if (color >= Utils.COLORS.length) {
-					color = Utils.COLORS.length - 2;
-				} else {
-					color = color - 1;
 				}
 
+				color =
+						model.getHamster(hid)
+								.getColor();
+
+				if (hid == -1) {
+
+					color =
+							model.getHamster(hid)
+									.getColor() - 1;
+
+				} else if (color <= -1) {
+
+					color = i;
+
+				} else if (color >= Utils.COLORS.length) {
+
+					color =
+							Utils.COLORS.length - 2;
+
+				} else {
+
+					color = color - 1;
+				}
 			}
 
+
 			// dibo 27.10.2006
-			int offset = d.getEndPosition().getOffset() - 1;
+
+			int offset =
+					d.getEndPosition()
+							.getOffset() - 1;
+
 			if (offset > 20000) {
-				String str = d.getText(0, 300);
-				int end = str.indexOf('\n');
-				if (end <= 0)
+
+				String str =
+						d.getText(0, 300);
+
+				int end =
+						str.indexOf('\n');
+
+				if (end <= 0) {
 					end = 10;
-				d.remove(0, end + 1);
+				}
+
+				d.remove(
+						0,
+						end + 1
+				);
 			}
-			offset = d.getEndPosition().getOffset() - 1;
-			// d.insertString(offset, text + "\n", d.getStyle("hamster" + i));
-			d.insertString(offset, text + "\n", d.getStyle("hamster" + color));
-			textPane.setCaretPosition(d.getEndPosition().getOffset() - 1);
+
+			offset =
+					d.getEndPosition()
+							.getOffset() - 1;
+
+			d.insertString(
+					offset,
+					text + "\n",
+					d.getStyle("hamster" + color)
+			);
+
+			textPane.setCaretPosition(
+					d.getEndPosition()
+							.getOffset() - 1
+			);
+
 		} catch (BadLocationException e) {
+
 			e.printStackTrace();
 		}
 	}
 
+
 	public void clearLog() {
-		StyledDocument d = (StyledDocument) textPane.getDocument();
+
+		StyledDocument d =
+				(StyledDocument) textPane.getDocument();
+
 		try {
-			d.remove(0, d.getEndPosition().getOffset());
+
+			d.remove(
+					0,
+					d.getEndPosition().getOffset()
+			);
+
 		} catch (Exception e) {
+
+			// ignorieren
 		}
+
 		textPane.setText("");
 	}
 
-	public void logEntry(String text, String result, boolean hamsterIns, int id) {
-		if (text.equals("") || result == null)
+
+
+	public void logEntry(String text,String result,boolean hamsterIns,int id) {
+
+		if (text == null || text.equals("") || result == null) {
 			return;
-		if (!result.equals("ok"))
+		}
+
+
+		/*
+		 * Auch bei diesem Log-Weg die Aliase anwenden.
+		 */
+		text = applyCommandAliases(text);
+
+
+		if (!result.equals("ok")) {
 			text += " : " + result;
-		StyledDocument d = (StyledDocument) textPane.getDocument();
+		}
+
+		StyledDocument d =
+				(StyledDocument) textPane.getDocument();
 
 		int color = -2;
-		SimulationModel model = de.hamster.workbench.Workbench.getWorkbench()
-				.getSimulationController().getSimulationModel();
+
+		SimulationModel model =
+				de.hamster.workbench.Workbench
+						.getWorkbench()
+						.getSimulationController()
+						.getSimulationModel();
+
 		int hid = -3;
+
 		try {
+
 			int i = -2;
+
 			if (hamsterIns) {
-				i = Math.min(id, Utils.COLORS.length - 2);
+
+				i = Math.min(
+						id,
+						Utils.COLORS.length - 2
+				);
 
 				hid = id;
-				if (model.getHamster(hid) == null)
+
+				if (model.getHamster(hid) == null) {
 					return;
-				color = model.getHamster(hid).getColor();
+				}
+
+				color =
+						model.getHamster(hid)
+								.getColor();
+
 				if (hid == -1) {
-					color = model.getHamster(hid).getColor() - 1;
+
+					color =
+							model.getHamster(hid)
+									.getColor() - 1;
+
 				} else if (color <= -1) {
+
 					color = i;
+
 				} else if (color >= Utils.COLORS.length) {
-					color = Utils.COLORS.length - 2;
+
+					color =
+							Utils.COLORS.length - 2;
+
 				} else {
+
 					color = color - 1;
 				}
 			}
 
+
 			// dibo 27.10.2006
-			int offset = d.getEndPosition().getOffset() - 1;
+
+			int offset =
+					d.getEndPosition()
+							.getOffset() - 1;
+
 			if (offset > 20000) {
-				String str = d.getText(0, 300);
-				int end = str.indexOf('\n');
-				if (end <= 0)
+
+				String str =
+						d.getText(0, 300);
+
+				int end =
+						str.indexOf('\n');
+
+				if (end <= 0) {
 					end = 10;
-				d.remove(0, end + 1);
+				}
+
+				d.remove(
+						0,
+						end + 1
+				);
 			}
-			offset = d.getEndPosition().getOffset() - 1;
-			// d.insertString(offset, text + "\n", d.getStyle("hamster" + i));
-			d.insertString(offset, text + "\n", d.getStyle("hamster" + color));
-			textPane.setCaretPosition(d.getEndPosition().getOffset() - 1);
+
+			offset =
+					d.getEndPosition()
+							.getOffset() - 1;
+
+			d.insertString(
+					offset,
+					text + "\n",
+					d.getStyle("hamster" + color)
+			);
+
+			textPane.setCaretPosition(
+					d.getEndPosition()
+							.getOffset() - 1
+			);
+
 		} catch (BadLocationException e) {
+
 			e.printStackTrace();
 		}
 	}

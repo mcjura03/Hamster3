@@ -1,7 +1,7 @@
 package de.hamster.model;
 
-import java.io.Serializable;
 import de.hamster.workbench.Utils;
+import java.io.Serializable;
 
 /**
  * Diese Instruktions-Klasse umfasst alle Befehle, die von einem Hamster
@@ -50,21 +50,27 @@ public class HamsterInstruction extends Instruction implements Serializable {
 	}
 
 	public String toString() {
+
+		String keybase = "hamster.";
+
+		if (Utils.getResource("python.alias.usage").equals("true")){
+			keybase = "python.alias.";
+		}
 		switch (getType()) {
 		case FORWARD:
-			return Utils.getResource("hamster.vor") + "()";
+			return Utils.getResource(keybase+"vor") + "()";
 		case TURN_LEFT:
-			return Utils.getResource("hamster.linksUm") + "()";
+			return Utils.getResource(keybase+"linksUm") + "()";
 		case LAY_DOWN:
-			return Utils.getResource("hamster.gib") + "()";
+			return Utils.getResource(keybase+"gib") + "()";
 		case PICK_UP:
-			return Utils.getResource("hamster.nimm") + "()";
+			return Utils.getResource(keybase+"nimm") + "()";
 		case FREE:
-			return Utils.getResource("hamster.vornFrei") + "()";
+			return Utils.getResource(keybase+"vornFrei") + "()";
 		case CORN_AVAILABLE:
-			return Utils.getResource("hamster.kornDa") + "()";
+			return Utils.getResource(keybase+"kornDa") + "()";
 		case MOUTH_EMPTY:
-			return Utils.getResource("hamster.maulLeer") + "()";
+			return Utils.getResource(keybase+"maulLeer") + "()";
 
 		case GET_ROW:
 			return Utils.getResource("hamster.getReihe") + "()";
