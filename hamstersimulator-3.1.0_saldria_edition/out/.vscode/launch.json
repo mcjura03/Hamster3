@@ -4,6 +4,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Workbench",
+            "request": "launch",
+            "mainClass": "de.hamster.workbench.Workbench",
+            "projectName": "hamstersimulator-3.1.0_saldria_edition_d083bea6"
+        },
+        {
+            "type": "java",
+            "name": "Workbench",
+            "request": "launch",
+            "mainClass": "de.hamster.workbench.Workbench",
+            "projectName": "hamstersimulator-3.1.0_saldria_edition_9c026401"
+        },
+        {
+            "type": "java",
             "name": "HSTest",
             "request": "launch",
             "mainClass": "de.hamster.HSTest",
@@ -11,7 +25,6 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole"
         },
-
         {
             "type": "java",
             "name": "Workbench",
@@ -21,7 +34,6 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole"
         },
-
         {
             "type": "java",
             "name": "Launch Java Program",
@@ -31,7 +43,6 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole"
         },
-
         {
             "type": "java",
             "name": "Hamstersimulator (run.java)",

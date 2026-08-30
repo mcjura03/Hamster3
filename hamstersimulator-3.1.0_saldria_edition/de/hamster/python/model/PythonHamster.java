@@ -16,6 +16,8 @@ public class PythonHamster extends Hamster {
 
 	public static PythonInterpreter interpreter;
 
+
+
 	public static boolean initPython() {
 		try {
 			interpreter = new PythonInterpreter();
@@ -24,6 +26,29 @@ public class PythonHamster extends Hamster {
 //			 PythonInterpreter.initialize(System.getProperties(), props,
 //			 new String[] { "" });
 //			 interpreter.exec("import random");
+
+			String vor = "vor";
+			String linksUm = "linksUm";
+			String gib = "gib";
+			String nimm = "nimm";
+			String vornFrei = "vornFrei";
+			String kornDa =	"kornDa";
+			String maulLeer = "maulLeer";
+
+			System.out.println("AAAAAAAAAAAAAAAA");
+
+			System.out.println(Utils.getResource("python.alias.usage"));
+
+
+			if (Utils.getResource("python.alias.usage").equals("true")){
+				 vor = Utils.getResource("python.alias.vor");
+				 linksUm = Utils.getResource("python.alias.linksUm");
+				 gib = Utils.getResource("python.alias.gib");
+				 nimm = Utils.getResource("python.alias.nimm");
+				 vornFrei = Utils.getResource("python.alias.vornFrei");
+				 kornDa = Utils.getResource("python.alias.kornDa");
+				 maulLeer = Utils.getResource("python.alias.maulLeer");
+			}
 
 			if (Utils.runlocally) {
 				interpreter.setIn(Workbench.getWorkbench().getView()
@@ -35,17 +60,18 @@ public class PythonHamster extends Hamster {
 			}
 			String command = "from de.hamster.python.model import PythonHamster;";
 			command = command + "Hamster = PythonHamster;";
-			command = command
-					+ "intern_shuwjndkdwlhdh = Hamster.getStandardHamsterIntern();";
-			command = command + "vor = intern_shuwjndkdwlhdh.vor;";
-			command = command + "linksUm = intern_shuwjndkdwlhdh.linksUm;";
-			command = command + "legAb = intern_shuwjndkdwlhdh.gib;";
-			command = command + "nimm = intern_shuwjndkdwlhdh.nimm;";
-			command = command + "vornFrei = intern_shuwjndkdwlhdh.vornFrei;";
-			command = command + "kornDa = intern_shuwjndkdwlhdh.kornDa;";
-			command = command + "maulLeer = intern_shuwjndkdwlhdh.maulLeer;";
+			command = command + "intern_shuwjndkdwlhdh = Hamster.getStandardHamsterIntern();";
+			command = command + vor + " = intern_shuwjndkdwlhdh.vor;";
+			command = command + linksUm +" = intern_shuwjndkdwlhdh.linksUm;";
+			command = command + gib + " = intern_shuwjndkdwlhdh.gib;";
+			command = command + nimm + " = intern_shuwjndkdwlhdh.nimm;";
+			command = command + vornFrei + " = intern_shuwjndkdwlhdh.vornFrei;";
+			command = command + kornDa + " = intern_shuwjndkdwlhdh.kornDa;";
+			command = command + maulLeer + " = intern_shuwjndkdwlhdh.maulLeer;";
 			command = command + "\n";
 			interpreter.exec(command);
+
+			System.out.println(command);
 		} catch (Throwable exc) {
 			exc.printStackTrace();
 			return false;

@@ -1,5 +1,2 @@
-/*python program*/if vornFrei():
-    vor()
-    
-
-
+/*python program*/if istDaPlatz():
+    schritt()

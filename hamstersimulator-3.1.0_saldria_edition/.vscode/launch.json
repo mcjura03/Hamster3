@@ -7,6 +7,13 @@
             "name": "Workbench",
             "request": "launch",
             "mainClass": "de.hamster.workbench.Workbench",
+            "projectName": "hamstersimulator-3.1.0_saldria_edition_d083bea6"
+        },
+        {
+            "type": "java",
+            "name": "Workbench",
+            "request": "launch",
+            "mainClass": "de.hamster.workbench.Workbench",
             "projectName": "hamstersimulator-3.1.0_saldria_edition_9c026401"
         },
         {
