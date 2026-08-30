@@ -1,0 +1,11 @@
+java.io.EOFException
+	at java.base/java.io.ObjectInputStream$BlockDataInputStream.peekByte(ObjectInputStream.java:3081)
+	at java.base/java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1571)
+	at java.base/java.io.ObjectInputStream.readObject(ObjectInputStream.java:487)
+	at java.base/java.io.ObjectInputStream.readObject(ObjectInputStream.java:445)
+	at de.hamster.debugger.model.RemoteProcessor.process(RemoteProcessor.java:179)
+	at de.hamster.debugger.model.Hamster.getStandardHamster(Hamster.java:97)
+	at de.hamster.debugger.model.RemoteRunner.main(RemoteRunner.java:110)
+java.lang.NullPointerException: Cannot load from int array because "data" is null
+	at de.hamster.debugger.model.Hamster.getStandardHamster(Hamster.java:99)
+	at de.hamster.debugger.model.RemoteRunner.main(RemoteRunner.java:110)

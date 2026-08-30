@@ -73,7 +73,7 @@ public class SimulationPanel extends JPanel implements Observer, MouseMotionList
 		}
 		this.corn = new Image[12];
 		for (int i = 0; i < this.corn.length; i++) {
-			this.corn[i] = Utils.getImage(i + 1 + "Corn32.png");
+			this.corn[i] = Utils.getImage(i + 1 + "Corn64.png");
 		}
 		this.wall = Utils.getImage("Wall128.png"); // new Design /JRahn
 

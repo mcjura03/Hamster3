@@ -223,7 +223,7 @@ public class SimulationTools implements MouseListener, MouseMotionListener {
 	public class CornTool extends TerrainTool {
 		public CornTool() {
 			super(true);
-			setImage(Utils.getImage("Corn32.png"));
+			setImage(Utils.getImage("1Corn64.png"));
 		}
 		public void done() {
 			try {
