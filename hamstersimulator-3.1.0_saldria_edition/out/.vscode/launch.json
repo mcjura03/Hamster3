@@ -1,0 +1,45 @@
+{
+    "version": "0.2.0",
+
+    "configurations": [
+        {
+            "type": "java",
+            "name": "HSTest",
+            "request": "launch",
+            "mainClass": "de.hamster.HSTest",
+            "projectName": "hamstersimulator-3.1.0_SaldriaEdition",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole"
+        },
+
+        {
+            "type": "java",
+            "name": "Workbench",
+            "request": "launch",
+            "mainClass": "de.hamster.workbench.Workbench",
+            "projectName": "hamstersimulator-3.1.0_SaldriaEdition",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole"
+        },
+
+        {
+            "type": "java",
+            "name": "Launch Java Program",
+            "request": "launch",
+            "mainClass": "",
+            "projectName": "hamstersimulator-3.1.0_SaldriaEdition",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole"
+        },
+
+        {
+            "type": "java",
+            "name": "Hamstersimulator (run.java)",
+            "request": "launch",
+            "mainClass": "de.hamster.run",
+            "projectName": "hamstersimulator-3.1.0_SaldriaEdition",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole"
+        }
+    ]
+}
