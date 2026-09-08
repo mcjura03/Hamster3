@@ -1,4 +1,4 @@
-# Hamster-Simulator 3.1.0 Saldria-Edition
+# Hamster-Simulator 3.1.0
 ---------------------------------
 
 (1)
@@ -8,7 +8,7 @@ https://www.java-hamster-modell.de/index.html
 
 (2)
 
-Dieses Projekt wurde konkret für den Unterrichtseinsatz am vSG angepasst, so sind in der ./ressources/hamster.properties [NICHT IM HAUPTVERZEICHNIS!] alternative Python-Befehle einsetzbar.
+In dieser Version ist für den Pyhton-Interpreter konkret die Option gegeben, eine gesonderte Sprache zu definieren, um den Hamster besser auf den Unterrichtseinsatz anzupassen.
 
 (3)
 Änderungen zum Original bestehen in:
@@ -20,5 +20,6 @@ Dieses Projekt wurde konkret für den Unterrichtseinsatz am vSG angepasst, so si
 - Update der verwendeten Grafiken
 - Anpassungen am User-Interface um die Nutzung auf Touch-Geräten zu vereinfachen
 - Hinzufügen einer Skalierungs-Option für die Menüleiste in der hamster.properties um das Anleiten durch Lehrkräfte zu vereifachen (Bessere Sichbarkeit am Beamer)
+- Option für alternative Python-Befehle als "Schuleigene Programmiersprache"
 
 Ziel ist die weitere Verfügbarkeit für SchülerInnen und Lehrkräfte auf neueren Systemen sicherzustellen, da die Nutzung im Browser in Prüfungssituationen nicht umsetzbar ist und auch Legacy-JREs langsam aus dem Support-Zeitraum fallen
