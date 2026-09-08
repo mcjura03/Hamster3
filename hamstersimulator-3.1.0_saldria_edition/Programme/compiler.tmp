@@ -1,0 +1,6 @@
+C:\Users\jura\OneDrive\Dokumente\Schule\Admin\Hamster3\3.1.0_Saldria\Hamster3\hamstersimulator-3.1.0_saldria_edition\Programme\NeuerHamster2.java:2: Fehler: Symbol nicht gefunden
+    schritt();
+    ^
+  Symbol: Methode schritt()
+  Ort: Klasse NeuerHamster2
+1 Fehler

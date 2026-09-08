@@ -1,4 +1,4 @@
-# Hamster-Simulator 3.X
+# Hamster-Simulator 3.1.0 Saldria-Edition
 ---------------------------------
 
 (1)
@@ -7,6 +7,10 @@ Das ursprüngliche Projekt ist verfügbar unter:
 https://www.java-hamster-modell.de/index.html
 
 (2)
+
+Dieses Projekt wurde konkret für den Unterrichtseinsatz am vSG angepasst, so sind in der ./ressources/hamster.properties [NICHT IM HAUPTVERZEICHNIS!] alternative Python-Befehle einsetzbar.
+
+(3)
 Änderungen zum Original bestehen in:
 
 - Entfernen von veralteten Datentypen (Observable, )
