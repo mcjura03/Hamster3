@@ -70,50 +70,50 @@ public class LogPanel extends JPanel implements LogSink {
 			return null;
 		}
 
-		if (!"true".equalsIgnoreCase(Utils.getResource("python.alias.usage"))) {
+		if (Utils.PYTHON_ALIAS_USAGE == false) {
 			return text;
 		}
 
 		text = replaceCommand(
 				text,
 				"vor",
-				Utils.getResource("python.alias.vor")
+				Utils.PYTHON_ALIAS_VOR
 		);
 
 		text = replaceCommand(
 				text,
 				"linksUm",
-				Utils.getResource("python.alias.linksUm")
+				Utils.PYTHON_ALIAS_LINKSUM
 		);
 
 		text = replaceCommand(
 				text,
 				"gib",
-				Utils.getResource("python.alias.gib")
+				Utils.PYTHON_ALIAS_GIB
 		);
 
 		text = replaceCommand(
 				text,
 				"nimm",
-				Utils.getResource("python.alias.nimm")
+				Utils.PYTHON_ALIAS_NIMM
 		);
 
 		text = replaceCommand(
 				text,
 				"vornFrei",
-				Utils.getResource("python.alias.vornFrei")
+				Utils.PYTHON_ALIAS_VORNFREI
 		);
 
 		text = replaceCommand(
 				text,
 				"kornDa",
-				Utils.getResource("python.alias.kornDa")
+				Utils.PYTHON_ALIAS_KORNDA
 		);
 
 		text = replaceCommand(
 				text,
 				"maulLeer",
-				Utils.getResource("python.alias.maulLeer")
+				Utils.PYTHON_ALIAS_MAULLEER
 		);
 
 		return text;

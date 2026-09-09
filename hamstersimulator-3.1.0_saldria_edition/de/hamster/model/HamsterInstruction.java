@@ -51,27 +51,63 @@ public class HamsterInstruction extends Instruction implements Serializable {
 
 	public String toString() {
 
-		String keybase = "hamster.";
+		boolean alias = Utils.PYTHON_ALIAS_USAGE;
 
-		if (Utils.getResource("python.alias.usage").equals("true")){
-			keybase = "python.alias.";
-		}
+		
 		switch (getType()) {
 		case FORWARD:
-			return Utils.getResource(keybase+"vor") + "()";
+			if (alias) {
+				return Utils.PYTHON_ALIAS_VOR + "()";
+			}
+			else	{
+				return Utils.getResource("hamster.vor") + "()";
+			}
 		case TURN_LEFT:
-			return Utils.getResource(keybase+"linksUm") + "()";
+			if (alias) {
+				return Utils.PYTHON_ALIAS_LINKSUM + "()";
+			}
+			else	{
+				return Utils.getResource("hamster.linksUm") + "()";
+			}
+			
 		case LAY_DOWN:
-			return Utils.getResource(keybase+"gib") + "()";
+			if (alias) {
+				return Utils.PYTHON_ALIAS_GIB + "()";
+			}
+			else	{
+				return Utils.getResource("hamster.gib") + "()";
+			}
+			
 		case PICK_UP:
-			return Utils.getResource(keybase+"nimm") + "()";
+			if (alias) {
+				return Utils.PYTHON_ALIAS_NIMM + "()";
+			}
+			else	{
+				return Utils.getResource("hamster.nimm") + "()";
+			}
 		case FREE:
-			return Utils.getResource(keybase+"vornFrei") + "()";
+			if (alias) {
+				return Utils.PYTHON_ALIAS_VORNFREI + "()";
+			}
+			else	{
+				return Utils.getResource("hamster.vornFrei") + "()";
+			}
 		case CORN_AVAILABLE:
-			return Utils.getResource(keybase+"kornDa") + "()";
+			if (alias) {
+				return Utils.PYTHON_ALIAS_KORNDA + "()";
+			}
+			else	{
+				return Utils.getResource("hamster.kornDa") + "()";
+			}
+			
 		case MOUTH_EMPTY:
-			return Utils.getResource(keybase+"maulLeer") + "()";
-
+			if (alias) {
+				return Utils.PYTHON_ALIAS_MAULLEER + "()";
+			}
+			else	{
+				return Utils.getResource("hamster.maulLeer") + "()";
+			}
+			
 		case GET_ROW:
 			return Utils.getResource("hamster.getReihe") + "()";
 		case GET_COL:

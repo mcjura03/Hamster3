@@ -1,18 +1,15 @@
 package de.hamster.editor.view;
 
+import de.hamster.model.HamsterFile;
+import de.hamster.workbench.Utils;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Vector;
-
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-
-import de.hamster.model.HamsterFile;
-import de.hamster.workbench.Utils;
 
 /**
  * Diese Klasse stellt einen Dialog dar, in dem der Benutzer den Typ eines neuen
@@ -76,7 +73,7 @@ public class NewHamsterDialog extends JDialog {
 		
 		// Python
 		if (Utils.PYTHON) {
-			if (Utils.getResource("python.alias.usage").equals("true")){
+			if (Utils.PYTHON_ALIAS_USAGE){
 				programTypesList.add(new ProgramType("Python [Saldria Edition]", HamsterFile.PYTHONPROGRAM));
 			}
 			else{			programTypesList.add(new ProgramType(Utils

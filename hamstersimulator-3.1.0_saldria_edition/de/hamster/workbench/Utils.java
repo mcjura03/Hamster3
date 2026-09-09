@@ -118,6 +118,7 @@ public class Utils {
 		return MessageFormat.format(getResource(key), new Object[] { param });
 	}
 
+	
 	// --- added by C. Noeske: very simple replacement of environment variables used in hamster.properties
 	public static String replaceEnvVariables(String s) {
 		int i = 0;
@@ -668,6 +669,20 @@ public class Utils {
 	/* lego */
 	public static boolean LEGO = false;
 
+	//Python Aliases
+
+	public static boolean PYTHON_ALIAS_USAGE = false;
+	public static String PYTHON_ALIAS_VOR = "vor";
+	public static String PYTHON_ALIAS_LINKSUM = "linksUm";
+	public static String PYTHON_ALIAS_NIMM = "nimm";
+	public static String PYTHON_ALIAS_GIB = "gib";
+	public static String PYTHON_ALIAS_VORNFREI = "vornFrei";
+	public static String PYTHON_ALIAS_KORNDA = "kornDa";
+	public static String PYTHON_ALIAS_MAULLEER = "maulLeer";
+
+
+
+
 	static Properties p;
 
 	public static void loadProperties() {
@@ -723,6 +738,66 @@ public class Utils {
 						Utils.EDITOR_BUTTON_SCALE = 1.0f; // jrahn: bei ungueltigem Wert auf Standard zurueckfallen
 					}
 				}
+
+				
+				/*
+				Einlesen der Config für alternative Python-Befehle:
+				python.alias.usage=true
+				python.alias.vor=schritt
+				python.alias.linksUm=drehLinks
+				python.alias.nimm=hebAuf
+				python.alias.gib=legAb
+				python.alias.vornFrei=istDaPlatz
+				python.alias.kornDa=istDaKorn
+				python.alias.maulLeer=hungrig
+				*/
+
+				str = p.getProperty("python.alias.usage");
+				if (str != null)
+					if (str.equals("true")) {
+						Utils.PYTHON_ALIAS_USAGE = true;
+					} else {
+						Utils.PYTHON_ALIAS_USAGE = false;
+					}
+
+				str = p.getProperty("python.alias.vor");
+				if (str != null){
+					Utils.PYTHON_ALIAS_VOR = str;
+				}
+
+				str = p.getProperty("python.alias.linksUm");
+				if (str != null){
+					Utils.PYTHON_ALIAS_LINKSUM = str;
+				}
+
+				str = p.getProperty("python.alias.nimm");
+				if (str != null){
+					Utils.PYTHON_ALIAS_NIMM = str;
+				}
+
+				str = p.getProperty("python.alias.gib");
+				if (str != null){
+					Utils.PYTHON_ALIAS_GIB = str;
+				}	
+
+				str = p.getProperty("python.alias.vornFrei");
+				if (str != null){
+					Utils.PYTHON_ALIAS_VORNFREI = str;
+				}
+
+				str = p.getProperty("python.alias.kornDa");
+				if (str != null){
+					Utils.PYTHON_ALIAS_KORNDA = str;
+				}
+
+				str = p.getProperty("python.alias.maulLeer");
+				if (str != null){
+					Utils.PYTHON_ALIAS_MAULLEER = str;
+				}
+
+				
+				
+				
 
 				// Scheme Martin
 				str = p.getProperty("scheme");

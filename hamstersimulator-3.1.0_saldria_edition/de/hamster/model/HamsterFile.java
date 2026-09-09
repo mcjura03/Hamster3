@@ -447,7 +447,7 @@ public class HamsterFile implements Comparable {
 			} else if (type == PROLOGPROGRAM) { // Prolog
 				return "main :-\n    vornFrei,\n    vor.\n";
 			} else if (type == PYTHONPROGRAM) { // Python 
-				if (Utils.getResource("python.alias.usage").equals("true")){
+				if (Utils.PYTHON_ALIAS_USAGE){
 					return "#Achtung: In dieser Datei musst du die im Unterricht besprochenen Befehle verwenden.\n#Die Befehle aus dem Internet funktionieren nicht!\n\nif istDaPlatz():\n    schritt()\n";
 				}
 				else{return "if vornFrei():\n    vor()\n";}

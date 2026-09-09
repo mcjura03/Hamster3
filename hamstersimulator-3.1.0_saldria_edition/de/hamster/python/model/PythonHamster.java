@@ -35,19 +35,16 @@ public class PythonHamster extends Hamster {
 			String kornDa =	"kornDa";
 			String maulLeer = "maulLeer";
 
-			System.out.println("AAAAAAAAAAAAAAAA");
-
-			System.out.println(Utils.getResource("python.alias.usage"));
 
 
-			if (Utils.getResource("python.alias.usage").equals("true")){
-				 vor = Utils.getResource("python.alias.vor");
-				 linksUm = Utils.getResource("python.alias.linksUm");
-				 gib = Utils.getResource("python.alias.gib");
-				 nimm = Utils.getResource("python.alias.nimm");
-				 vornFrei = Utils.getResource("python.alias.vornFrei");
-				 kornDa = Utils.getResource("python.alias.kornDa");
-				 maulLeer = Utils.getResource("python.alias.maulLeer");
+			if (Utils.PYTHON_ALIAS_USAGE){
+				 vor = Utils.PYTHON_ALIAS_VOR;
+				 linksUm = Utils.PYTHON_ALIAS_LINKSUM;
+				 gib = Utils.PYTHON_ALIAS_GIB;
+				 nimm = Utils.PYTHON_ALIAS_NIMM;
+				 vornFrei = Utils.PYTHON_ALIAS_VORNFREI;
+				 kornDa = Utils.PYTHON_ALIAS_KORNDA;
+				 maulLeer = Utils.PYTHON_ALIAS_MAULLEER;
 			}
 
 			if (Utils.runlocally) {
